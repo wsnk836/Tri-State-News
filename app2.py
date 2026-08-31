@@ -779,57 +779,61 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
                 )
 
         # ==========================================
-        # --- DIRECT DESK FEEDBACK & SUBMISSION FORM ---
+        # --- DIRECT DESK FEEDBACK & SUBMISSION FORM (OPEN) ---
         # ==========================================
         st.markdown("<div style='margin-top: 25px;'></div>", unsafe_allow_html=True)
-        with st.expander("✉️ Send Community Announcement or Feedback to TSN Desk", expanded=False):
-            st.markdown(
-                """
+        st.markdown(
+            """
+            <div style="background: #ffffff; border: 1px solid #cbd5e1; border-top: 4px solid #dc2626; border-radius: 14px; padding: 24px; box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08); margin-bottom: 25px;">
+                <h3 style="color: #0f172a; margin-top: 0; font-size: 1.2rem; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+                    ✉️ Send Community Announcement or Feedback to TSN Desk
+                </h3>
                 <p style="color: #334155; font-size: 0.9rem; margin-bottom: 15px;">
-                    Have a local news tip, a community announcement, or app feedback? Click below to instantly open your email client pre-addressed to <strong>wsnk836@gmail.com</strong> and <strong>news@tsnnet.org</strong>.
+                    Have a local news tip, a community announcement, or app feedback? Fill out the form below to instantly open your email client pre-addressed to <strong>wsnk836@gmail.com</strong> and <strong>news@tsnnet.org</strong>.
                 </p>
-                """,
-                unsafe_allow_html=True
-            )
+            """,
+            unsafe_allow_html=True
+        )
+        
+        with st.form("tsn_feedback_form"):
+            fb_name = st.text_input("Your Name / Organization", placeholder="e.g. Jane Doe or Riverside Community Club")
+            fb_type = st.selectbox("Submission Type", ["Community Announcement", "News Tip / Scoop", "App Feedback / Bug Report"])
+            fb_title = st.text_input("Headline / Subject", placeholder="e.g. Annual Community Food Drive at City Park")
+            fb_message = st.text_area("Message Details", placeholder="Provide all relevant details, times, locations, or feedback notes here...")
             
-            with st.form("tsn_feedback_form"):
-                fb_name = st.text_input("Your Name / Organization", placeholder="e.g. Jane Doe or Riverside Community Club")
-                fb_type = st.selectbox("Submission Type", ["Community Announcement", "News Tip / Scoop", "App Feedback / Bug Report"])
-                fb_title = st.text_input("Headline / Subject", placeholder="e.g. Annual Community Food Drive at City Park")
-                fb_message = st.text_area("Message Details", placeholder="Provide all relevant details, times, locations, or feedback notes here...")
-                
-                submitted = st.form_submit_button("Open Email Client to Send")
-                
-                if submitted:
-                    if not fb_name.strip() or not fb_title.strip() or not fb_message.strip():
-                        st.error("Please fill out all required fields before sending.")
-                    else:
-                        recipients = "wsnk836@gmail.com,news@tsnnet.org"
-                        subject = urllib.parse.quote(f"[{fb_type}] {fb_title}")
-                        body = urllib.parse.quote(f"Name/Org: {fb_name}\nType: {fb_type}\n\nDetails:\n{fb_message}")
-                        
-                        mailto_url = f"mailto:{recipients}?subject={subject}&body={body}"
-                        
-                        email_trigger_html = f"""
-                        <script>
-                            window.location.href = "{mailto_url}";
-                        </script>
-                        """
-                        components.html(email_trigger_html, height=0)
-                        
-                        st.success("Preparing your email client! If your device didn't open it automatically, click the secure link below:")
-                        st.markdown(f'<a href="{mailto_url}" target="_blank" style="background-color: #dc2626; color: white; padding: 10px 16px; border-radius: 6px; text-decoration: none; font-weight: 800; display: inline-block; margin-top: 10px;">✉️ Click Here to Launch Email Client</a>', unsafe_allow_html=True)
-                        
-                        # If it's a community announcement, also push it to the live board state
-                        if fb_type == "Community Announcement":
-                            new_item = {
-                                "author": fb_name.strip(),
-                                "title": fb_title.strip(),
-                                "text": fb_message.strip(),
-                                "time": datetime.now(ZoneInfo("America/Chicago")).strftime("%b %d, %I:%M %p")
-                            }
-                            st.session_state.community_announcements.insert(0, new_item)
+            submitted = st.form_submit_button("Open Email Client to Send")
+            
+            if submitted:
+                if not fb_name.strip() or not fb_title.strip() or not fb_message.strip():
+                    st.error("Please fill out all required fields before sending.")
+                else:
+                    recipients = "wsnk836@gmail.com,news@tsnnet.org"
+                    subject = urllib.parse.quote(f"[{fb_type}] {fb_title}")
+                    body = urllib.parse.quote(f"Name/Org: {fb_name}\nType: {fb_type}\n\nDetails:\n{fb_message}")
+                    
+                    mailto_url = f"mailto:{recipients}?subject={subject}&body={body}"
+                    
+                    email_trigger_html = f"""
+                    <script>
+                        window.location.href = "{mailto_url}";
+                    </script>
+                    """
+                    components.html(email_trigger_html, height=0)
+                    
+                    st.success("Preparing your email client! If your device didn't open it automatically, click the secure link below:")
+                    st.markdown(f'<a href="{mailto_url}" target="_blank" style="background-color: #dc2626; color: white; padding: 10px 16px; border-radius: 6px; text-decoration: none; font-weight: 800; display: inline-block; margin-top: 10px;">✉️ Click Here to Launch Email Client</a>', unsafe_allow_html=True)
+                    
+                    # If it's a community announcement, also push it to the live board state
+                    if fb_type == "Community Announcement":
+                        new_item = {
+                            "author": fb_name.strip(),
+                            "title": fb_title.strip(),
+                            "text": fb_message.strip(),
+                            "time": datetime.now(ZoneInfo("America/Chicago")).strftime("%b %d, %I:%M %p")
+                        }
+                        st.session_state.community_announcements.insert(0, new_item)
 
+        st.markdown("</div>", unsafe_allow_html=True)
         st.markdown("</div>", unsafe_allow_html=True)
 
 # Run Main Fragment Loop
