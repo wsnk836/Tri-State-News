@@ -753,7 +753,7 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
 render_tsn_broadcast_center(ACTIVE_LAT, ACTIVE_LON, location_name)
 
 # ==========================================
-# --- RESTRUCTURED & ENLARGED FACEBOOK FEED ---
+# --- RESPONSIVE DEVICE-SCALED FACEBOOK FEED ---
 # ==========================================
 st.markdown("<div style='margin-top: 35px;'></div>", unsafe_allow_html=True)
 
@@ -771,16 +771,16 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# Expanded dimensions: width set to 800px and height to 900px for easier reading
+# Responsive container with CSS max-width and dynamic width attribute for fluid device sizing
 fb_feed_html = """
-<div style="background: #12131a; padding: 20px; border-radius: 12px; border: 1px solid #27272a; text-align: center; display: flex; justify-content: center; overflow: hidden;">
+<div style="background: #12131a; padding: 15px; border-radius: 12px; border: 1px solid #27272a; text-align: center; width: 100%; max-width: 100%; box-sizing: border-box; overflow: hidden;">
     <div id="fb-root"></div>
     <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v18.0"></script>
     <div class="fb-page" 
          data-href="https://www.facebook.com/p/Tri-State-News-100078393567762/" 
          data-tabs="timeline" 
-         data-width="800" 
-         data-height="900" 
+         data-width="500" 
+         data-height="850" 
          data-small-header="false" 
          data-adapt-container-width="true" 
          data-hide-cover="false" 
@@ -791,7 +791,7 @@ fb_feed_html = """
     </div>
 </div>
 """
-components.html(fb_feed_html, height=940, scrolling=True)
+components.html(fb_feed_html, height=880, scrolling=True)
 
 
 # ==========================================
