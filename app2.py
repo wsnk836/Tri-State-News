@@ -1,3 +1,4 @@
+```python
 from datetime import datetime
 import time
 from zoneinfo import ZoneInfo
@@ -638,3 +639,5 @@ st.markdown(
 """,
     unsafe_allow_html=True,
 )
+
+```
