@@ -741,27 +741,23 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
         if len(st.session_state.community_announcements) == 0:
             st.info("No active community announcements on the board.")
         else:
-            ann_cols = st.columns(2, gap="medium")
+            # Display announcements stacked in full-width containers with enlarged text and spacing
             for idx, ann in enumerate(st.session_state.community_announcements):
-                target_col = ann_cols[idx % 2]
-                with target_col:
-                    st.markdown(
-                        f"""
-                        <div style="background: #0f1015; border: 1px solid #27272a; border-left: 4px solid #ef4444; border-radius: 10px; padding: 16px; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.4); height: 160px; display: flex; flex-direction: column; justify-content: space-between;">
-                            <div>
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                                    <strong style="color: #fafafa; font-size: 0.95rem; font-weight: 800;">{ann['title']}</strong>
-                                    <span style="color: #71717a; font-size: 0.72rem; background: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px;">{ann['time']}</span>
-                                </div>
-                                <p style="color: #d4d4d8; font-size: 0.85rem; margin: 0; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">{ann['text']}</p>
-                            </div>
-                            <div style="color: #a1a1aa; font-size: 0.75rem; font-style: italic; border-top: 1px solid #27272a; padding-top: 6px; margin-top: 6px;">
-                                Submitted by: <strong style="color: #e4e4e7;">{ann['author']}</strong>
-                            </div>
+                st.markdown(
+                    f"""
+                    <div style="background: #0f1015; border: 1px solid #27272a; border-left: 5px solid #ef4444; border-radius: 12px; padding: 22px; margin-bottom: 20px; box-shadow: 0 6px 18px rgba(0,0,0,0.5);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <strong style="color: #fafafa; font-size: 1.25rem; font-weight: 800; letter-spacing: -0.01em;">{ann['title']}</strong>
+                            <span style="color: #a1a1aa; font-size: 0.85rem; background: rgba(255,255,255,0.06); padding: 3px 10px; border-radius: 6px; font-weight: 600;">{ann['time']}</span>
                         </div>
-                        """,
-                        unsafe_allow_html=True,
-                    )
+                        <p style="color: #f4f4f5; font-size: 1.1rem; margin: 0 0 16px 0; line-height: 1.6;">{ann['text']}</p>
+                        <div style="color: #d4d4d8; font-size: 0.9rem; font-style: italic; border-top: 1px solid #27272a; padding-top: 10px; display: flex; align-items: center; gap: 6px;">
+                            <span>Submitted by:</span> <strong style="color: #fca5a5; font-weight: 700;">{ann['author']}</strong>
+                        </div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
 
         st.markdown("<div style='margin-top: 10px;'></div>", unsafe_allow_html=True)
         with st.expander("➕ Broadcast New Community Announcement"):
