@@ -14,7 +14,7 @@ st.set_page_config(
 )
 
 # --- CONFIGURE YOUR SHARED GOOGLE SHEET WEB APP URL HERE ---
-GOOGLE_SHEET_WEB_APP_URL = "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE"
+GOOGLE_SHEET_WEB_APP_URL = "https://script.google.com/macros/s/YOUR_ACTUAL_SCRIPT_ID/exec"
 
 # --- PWA STATIC MANIFEST INCORPORATION ---
 pwa_manifest_code = """
@@ -809,10 +809,8 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
 
             if comm_submitted:
                 if comm_author.strip() and comm_contact.strip() and comm_title.strip() and comm_details.strip():
-                    # Create a unique submission signature
                     current_sig = f"{comm_author.strip()}_{comm_title.strip()}_{comm_details.strip()}"
                     
-                    # Prevent duplicate submissions if the same signature triggers twice
                     if st.session_state.last_comm_submission != current_sig:
                         st.session_state.last_comm_submission = current_sig
                         current_time_str = datetime.now(ZoneInfo("America/Chicago")).strftime("%b %d, %I:%M %p")
@@ -861,7 +859,6 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
             unsafe_allow_html=True,
         )
 
-        # Native Streamlit Form for Feedback
         with st.form("feedback_native_form"):
             st.markdown("<h4 style='color: #0f172a; font-size: 1.1rem; font-weight: 800; margin-top: 5px; margin-bottom: 12px;'>📝 Submit Feedback or Suggestion</h4>", unsafe_allow_html=True)
             fb_name = st.text_input("Your Name *", placeholder="e.g. John Doe", key="fb_name_input")
@@ -884,7 +881,6 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
                 else:
                     st.error("Please fill out all required fields before submitting feedback.")
 
-        # If admin is logged in, show submitted feedback items
         if st.session_state.admin_logged_in and len(st.session_state.feedback_list) > 0:
             st.markdown("<h4 style='color: #0f172a; font-size: 1rem; font-weight: 800; margin-top: 20px;'>📥 Received User Feedback (Admin View)</h4>", unsafe_allow_html=True)
             for f_idx, f_item in enumerate(st.session_state.feedback_list):
