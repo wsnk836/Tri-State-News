@@ -334,17 +334,29 @@ Want quick one-tap access to Tri-State News like a native mobile app? Follow the
 
 st.markdown("<div style='margin-bottom: 15px;'></div>", unsafe_allow_html=True)
 
+# --- SESSION STATE INITIALIZATION ---
+if "admin_logged_in" not in st.session_state:
+    st.session_state.admin_logged_in = False
+
+if "breaking_news_title" not in st.session_state:
+    st.session_state.breaking_news_title = "Body found in Riverside Park"
+
+if "breaking_news_link" not in st.session_state:
+    st.session_state.breaking_news_link = (
+        "https://www.facebook.com/p/Tri-State-News-100078393567762/"
+    )
+
 # --- BREAKING NEWS BANNER ---
 st.markdown(
-    """
+    f"""
 <div class="breaking-news-banner">
-    <a href="https://www.facebook.com/p/Tri-State-News-100078393567762/" target="_blank" class="breaking-news-link">
+    <a href="{st.session_state.breaking_news_link}" target="_blank" class="breaking-news-link">
         <div style="display: flex; align-items: center; gap: 12px;">
             <span class="tsn-live-badge">BREAKING NEWS</span>
-            <span style="font-size: 1.05rem; font-weight: 800; letter-spacing: -0.01em;">Body found in Riverside Park</span>
+            <span style="font-size: 1.05rem; font-weight: 800; letter-spacing: -0.01em;">{st.session_state.breaking_news_title}</span>
         </div>
         <div style="font-size: 0.85rem; color: #a1a1aa; font-weight: 600; display: flex; align-items: center; gap: 4px;">
-            <span>Read Update on Facebook</span> &rarr;
+            <span>Read Update</span> &rarr;
         </div>
     </a>
 </div>
@@ -433,9 +445,6 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
 
     if "selected_forecast_day" not in st.session_state:
         st.session_state.selected_forecast_day = None
-
-    if "admin_logged_in" not in st.session_state:
-        st.session_state.admin_logged_in = False
 
     if "community_announcements" not in st.session_state:
         st.session_state.community_announcements = [
@@ -761,7 +770,7 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
 
         st.markdown("<div style='margin-top: 25px;'></div>", unsafe_allow_html=True)
         
-        # --- FIXED SUBMISSION FORM (NOT AN EXPANDER) ---
+        # --- FIXED SUBMISSION FORM ---
         st.markdown(
             """
             <div style="background: #12131c; border: 1px solid #27272a; border-top: 3px solid #ef4444; border-radius: 12px; padding: 20px; margin-bottom: 25px; box-shadow: 0 6px 20px rgba(0,0,0,0.5);">
@@ -803,7 +812,6 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
                         },
                     )
 
-                    # Hidden client-side transmission to wsnk836@gmail.com via Web3Forms
                     safe_author = ann_author.strip().replace("'", "\\'")
                     safe_email = ann_email.strip().replace("'", "\\'")
                     safe_title = ann_title.strip().replace("'", "\\'")
@@ -841,7 +849,7 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
 
         st.markdown("</div>", unsafe_allow_html=True)
 
-        # --- ADMIN LOGIN & SELECTION REMOVAL CONSOLE ---
+        # --- ADMIN LOGIN & MANAGEMENT CONSOLE ---
         with st.expander("🛡️ Admin Console & Management Login"):
             if not st.session_state.admin_logged_in:
                 with st.form("admin_login_form"):
@@ -860,6 +868,27 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
             else:
                 st.markdown("<div style='color: #34d399; font-weight: 700; margin-bottom: 10px;'>🟢 Admin Session Active</div>", unsafe_allow_html=True)
                 
+                # --- UPDATE BREAKING NEWS BANNER FORM ---
+                st.markdown("<h4 style='color: #f87171; font-size: 1.05rem; margin-top: 15px;'>🚨 Update Breaking News Banner</h4>", unsafe_allow_html=True)
+                with st.form("admin_breaking_news_form"):
+                    new_bn_title = st.text_input("Breaking News Headline", value=st.session_state.breaking_news_title)
+                    new_bn_link = st.text_input("Story Reference URL / Link", value=st.session_state.breaking_news_link)
+                    bn_submitted = st.form_submit_button("Update Breaking News Banner", use_container_width=True)
+
+                    if bn_submitted:
+                        if not new_bn_title.strip() or not new_bn_link.strip():
+                            st.error("Please provide both a headline and a reference link.")
+                        else:
+                            st.session_state.breaking_news_title = new_bn_title.strip()
+                            st.session_state.breaking_news_link = new_bn_link.strip()
+                            st.success("Breaking news banner updated successfully!")
+                            time.sleep(0.3)
+                            st.rerun()
+
+                st.markdown("<hr style='border: 1px solid #27272a; margin: 20px 0;'>", unsafe_allow_html=True)
+                
+                # --- REMOVE COMMUNITY ANNOUNCEMENTS FORM ---
+                st.markdown("<h4 style='color: #f87171; font-size: 1.05rem;'>🗑️ Remove Community Announcements</h4>", unsafe_allow_html=True)
                 with st.form("admin_management_form"):
                     st.write("Select the unwanted announcements you wish to permanently remove from the board:")
                     
@@ -877,7 +906,6 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
 
                     if delete_submitted:
                         if selected_indices_to_remove:
-                            # Remove items in reverse order to prevent shifting index issues
                             for index in sorted(selected_indices_to_remove, reverse=True):
                                 st.session_state.community_announcements.pop(index)
                             st.success(f"Successfully removed {len(selected_indices_to_remove)} notice(s).")
