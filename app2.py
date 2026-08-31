@@ -383,6 +383,9 @@ if "breaking_news_link" not in st.session_state:
 if "feedback_list" not in st.session_state:
     st.session_state.feedback_list = []
 
+if "last_comm_submission" not in st.session_state:
+    st.session_state.last_comm_submission = ""
+
 # --- BREAKING NEWS BANNER ---
 st.markdown(
     f"""
@@ -794,7 +797,7 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
                             st.error(f"Failed to delete: {e}")
                 st.markdown("</div></div>", unsafe_allow_html=True)
 
-        # Native Streamlit Form for Community Announcements (Universal visibility)
+        # Native Streamlit Form with Duplicate Submission Guard
         st.markdown("<h4 style='color: #0f172a; font-size: 1.1rem; font-weight: 800; margin-top: 25px;'>✍️ Submit a Community Announcement</h4>", unsafe_allow_html=True)
         
         with st.form("community_announcement_native_form"):
@@ -806,25 +809,33 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
 
             if comm_submitted:
                 if comm_author.strip() and comm_contact.strip() and comm_title.strip() and comm_details.strip():
-                    current_time_str = datetime.now(ZoneInfo("America/Chicago")).strftime("%b %d, %I:%M %p")
-                    payload = {
-                        "action": "add",
-                        "author": comm_author.strip(),
-                        "contact": comm_contact.strip(),
-                        "title": comm_title.strip(),
-                        "text": comm_details.strip(),
-                        "time": current_time_str
-                    }
-                    try:
-                        resp = requests.post(GOOGLE_SHEET_WEB_APP_URL, json=payload, timeout=8)
-                        if resp.status_code == 200:
-                            st.success("Notice successfully broadcasted to the public board for all users to see!")
-                            time.sleep(0.6)
-                            st.rerun()
-                        else:
-                            st.error("Backend error recording submission. Please check your web app URL.")
-                    except Exception as e:
-                        st.error(f"Connection error posting notice: {e}")
+                    # Create a unique submission signature
+                    current_sig = f"{comm_author.strip()}_{comm_title.strip()}_{comm_details.strip()}"
+                    
+                    # Prevent duplicate submissions if the same signature triggers twice
+                    if st.session_state.last_comm_submission != current_sig:
+                        st.session_state.last_comm_submission = current_sig
+                        current_time_str = datetime.now(ZoneInfo("America/Chicago")).strftime("%b %d, %I:%M %p")
+                        payload = {
+                            "action": "add",
+                            "author": comm_author.strip(),
+                            "contact": comm_contact.strip(),
+                            "title": comm_title.strip(),
+                            "text": comm_details.strip(),
+                            "time": current_time_str
+                        }
+                        try:
+                            resp = requests.post(GOOGLE_SHEET_WEB_APP_URL, json=payload, timeout=8)
+                            if resp.status_code == 200:
+                                st.success("Notice successfully broadcasted to the public board for all users to see!")
+                                time.sleep(0.6)
+                                st.rerun()
+                            else:
+                                st.error("Backend error recording submission. Please check your web app URL.")
+                        except Exception as e:
+                            st.error(f"Connection error posting notice: {e}")
+                    else:
+                        st.warning("This submission was already processed.")
                 else:
                     st.error("Please fill out all required fields before broadcasting.")
 
