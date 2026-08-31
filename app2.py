@@ -101,7 +101,7 @@ st.markdown(
         line-height: 1.5;
     }
     .welcome-card { border-left: 4px solid #ef4444; }
-    .repeater-card {
+    .news-card {
         background: rgba(239, 68, 68, 0.05);
         border: 1px solid rgba(239, 68, 68, 0.2);
         border-left: 4px solid #f87171;
@@ -527,8 +527,8 @@ def load_live_weather(lat, lon, loc_label):
     st.subheader("📻 Community News")
     st.markdown(
         """
-        <div class="command-card repeater-card">
-            <strong>GMRS REPEATER GOING ACTIVE — 12/01/2026:</strong> Tune to <strong>Channel 22</strong> (462.725 MHz) • <strong>PL Tone 123.0 Hz</strong>. Fully open for community use!
+        <div class="command-card news-card">
+            <strong>LOCAL COMMUNITY UPDATE:</strong> Stay tuned here for regional announcements, weather advisories, and local updates across the tri-state area.
         </div>
         """,
         unsafe_allow_html=True,
