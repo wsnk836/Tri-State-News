@@ -653,7 +653,7 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
     )
 
     # ==========================================
-    # --- COMMUNITY ANNOUNCEMENTS AREA ---
+    # --- COMMUNITY ANNOUNCEMENTS BOARD ---
     # ==========================================
     st.markdown("<div style='margin-top: 25px;'></div>", unsafe_allow_html=True)
     st.markdown(
@@ -669,21 +669,72 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
         unsafe_allow_html=True,
     )
 
-    # Display existing announcements (emails remain private)
-    for ann in st.session_state.community_announcements:
+    # --- ADMIN DELETE ACCESS PANEL ---
+    if "admin_unlocked" not in st.session_state:
+      st.session_state.admin_unlocked = False
+
+    with st.expander("🔒 Admin Moderation Control", expanded=False):
+      if not st.session_state.admin_unlocked:
+        admin_pin = st.text_input(
+            "Enter 6-Digit Admin PIN", type="password", max_chars=6
+        )
+        if st.button("Unlock Admin Mode"):
+          if admin_pin == "836836":
+            st.session_state.admin_unlocked = True
+            st.success("Admin mode unlocked!")
+            time.sleep(0.5)
+            st.rerun()
+          else:
+            st.error("Incorrect 6-digit PIN.")
+      else:
+        st.success("🔓 Admin mode is active.")
+        if st.button("Lock Admin Mode"):
+          st.session_state.admin_unlocked = False
+          st.rerun()
+
+    # Display announcements with optional admin delete button
+    if not st.session_state.community_announcements:
       st.markdown(
-          f"""
-            <div style="background: #0f1015; border: 1px solid #27272a; border-left: 3px solid #ef4444; border-radius: 8px; padding: 12px; margin-bottom: 10px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                    <strong style="color: #fafafa; font-size: 0.9rem;">{ann['title']}</strong>
-                    <span style="color: #71717a; font-size: 0.75rem;">{ann['time']}</span>
-                </div>
-                <p style="color: #d4d4d8; font-size: 0.85rem; margin: 0 0 6px 0; line-height: 1.4;">{ann['text']}</p>
-                <div style="color: #a1a1aa; font-size: 0.75rem; font-style: italic;">Posted by: {ann['author']}</div>
-            </div>
-            """,
+          "<p style='color: #71717a; font-size: 0.85rem; font-style: italic;'>No"
+          " active announcements right now.</p>",
           unsafe_allow_html=True,
       )
+    else:
+      for idx, ann in enumerate(st.session_state.community_announcements):
+        if st.session_state.admin_unlocked:
+          col_post, col_del = st.columns([5.5, 0.8], vertical_alignment="center")
+          with col_post:
+            st.markdown(
+                f"""
+                <div style="background: #0f1015; border: 1px solid #27272a; border-left: 3px solid #ef4444; border-radius: 8px; padding: 12px; margin-bottom: 10px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                        <strong style="color: #fafafa; font-size: 0.9rem;">{ann['title']}</strong>
+                        <span style="color: #71717a; font-size: 0.75rem;">{ann['time']}</span>
+                    </div>
+                    <p style="color: #d4d4d8; font-size: 0.85rem; margin: 0 0 6px 0; line-height: 1.4;">{ann['text']}</p>
+                    <div style="color: #a1a1aa; font-size: 0.75rem; font-style: italic;">Posted by: {ann['author']}</div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+          with col_del:
+            if st.button("🗑️ Delete", key=f"del_ann_{idx}", use_container_width=True):
+              st.session_state.community_announcements.pop(idx)
+              st.rerun()
+        else:
+          st.markdown(
+              f"""
+              <div style="background: #0f1015; border: 1px solid #27272a; border-left: 3px solid #ef4444; border-radius: 8px; padding: 12px; margin-bottom: 10px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                      <strong style="color: #fafafa; font-size: 0.9rem;">{ann['title']}</strong>
+                      <span style="color: #71717a; font-size: 0.75rem;">{ann['time']}</span>
+                  </div>
+                  <p style="color: #d4d4d8; font-size: 0.85rem; margin: 0 0 6px 0; line-height: 1.4;">{ann['text']}</p>
+                  <div style="color: #a1a1aa; font-size: 0.75rem; font-style: italic;">Posted by: {ann['author']}</div>
+              </div>
+              """,
+              unsafe_allow_html=True,
+          )
 
     # Submission form with mandatory email requirement and dispatch to wsnk836@gmail.com via Web3Forms
     with st.expander("➕ Post New Community Announcement"):
@@ -716,7 +767,6 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
                 "%b %d, %I:%M %p"
             )
 
-            # Add to local session state list (excluding email so it remains private on the public board)
             st.session_state.community_announcements.insert(
                 0,
                 {
@@ -727,7 +777,6 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
                 },
             )
 
-            # Client-side JS trigger to send a copy to wsnk836@gmail.com using Web3Forms
             safe_author = ann_author.strip().replace("'", "\\'")
             safe_email = ann_email.strip().replace("'", "\\'")
             safe_title = ann_title.strip().replace("'", "\\'")
