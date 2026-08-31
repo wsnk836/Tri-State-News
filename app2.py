@@ -450,7 +450,7 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
         st.session_state.selected_forecast_day = None
 
     if "community_announcements" not in st.session_state:
-        st.session_state.community_announcements = [
+        st.session_state.community_announcements = 
             {
                 "author": "TSN Desk",
                 "title": "Welcome to Tri-State Announcements",
@@ -466,7 +466,6 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
                 "time": datetime.now(ZoneInfo("America/Chicago")).strftime(
                     "%b %d, %I:%M %p"
                 ),
-            },
         ]
 
     # --- ACTIVE WEATHER ALERTS ---
