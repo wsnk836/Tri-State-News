@@ -393,45 +393,6 @@ if "community_announcements" not in st.session_state:
         },
     ]
 
-# ==========================================
-# --- ADMIN CONTROL PANEL EXPANDER ---
-# ==========================================
-with st.expander("🔐 Admin Control Panel", expanded=st.session_state.admin_logged_in):
-    if not st.session_state.admin_logged_in:
-        admin_pass = st.text_input("Enter Admin Password", type="password")
-        if st.button("Log In as Admin"):
-            if admin_pass == "tsnadmin2026":
-                st.session_state.admin_logged_in = True
-                st.success("Admin login successful!")
-                time.sleep(0.5)
-                st.rerun()
-            else:
-                st.error("Incorrect admin password.")
-    else:
-        st.markdown(
-            "<span style='color: #16a34a; font-weight: 800;'>🟢 Status: Logged in as Administrator</span>",
-            unsafe_allow_html=True,
-        )
-        
-        st.markdown("---")
-        st.markdown("<h4 style='color: #0f172a; font-size: 1.1rem; font-weight: 800;'>🚨 Update Breaking News Banner</h4>", unsafe_allow_html=True)
-        with st.form("admin_breaking_news_form"):
-            new_bn_title = st.text_input("Breaking News Headline", value=st.session_state.breaking_news_title)
-            new_bn_link = st.text_input("Breaking News Destination URL", value=st.session_state.breaking_news_link)
-            update_bn_submitted = st.form_submit_button("Update Breaking News Banner")
-
-            if update_bn_submitted:
-                st.session_state.breaking_news_title = new_bn_title.strip()
-                st.session_state.breaking_news_link = new_bn_link.strip()
-                st.success("Breaking news banner updated successfully!")
-                time.sleep(0.5)
-                st.rerun()
-
-        st.markdown("---")
-        if st.button("Log Out Admin"):
-            st.session_state.admin_logged_in = False
-            st.rerun()
-
 # --- BREAKING NEWS BANNER ---
 st.markdown(
     f"""
@@ -898,6 +859,46 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
             st.success("Thank you! Your feedback has been successfully emailed to wsnk836@gmail.com.")
 
         st.markdown("</div>", unsafe_allow_html=True)
+
+        # ==========================================
+        # --- ADMIN CONTROL PANEL (MOVED TO BOTTOM) ---
+        # ==========================================
+        st.markdown("<div style='margin-top: 35px;'></div>", unsafe_allow_html=True)
+        with st.expander("🔐 Admin Control Panel", expanded=st.session_state.admin_logged_in):
+            if not st.session_state.admin_logged_in:
+                admin_pass = st.text_input("Enter Admin Password", type="password")
+                if st.button("Log In as Admin"):
+                    if admin_pass == "052723":
+                        st.session_state.admin_logged_in = True
+                        st.success("Admin login successful!")
+                        time.sleep(0.5)
+                        st.rerun()
+                    else:
+                        st.error("Incorrect admin password.")
+            else:
+                st.markdown(
+                    "<span style='color: #16a34a; font-weight: 800;'>🟢 Status: Logged in as Administrator</span>",
+                    unsafe_allow_html=True,
+                )
+                
+                st.markdown("---")
+                st.markdown("<h4 style='color: #0f172a; font-size: 1.1rem; font-weight: 800;'>🚨 Update Breaking News Banner</h4>", unsafe_allow_html=True)
+                with st.form("admin_breaking_news_form"):
+                    new_bn_title = st.text_input("Breaking News Headline", value=st.session_state.breaking_news_title)
+                    new_bn_link = st.text_input("Breaking News Destination URL", value=st.session_state.breaking_news_link)
+                    update_bn_submitted = st.form_submit_button("Update Breaking News Banner")
+
+                    if update_bn_submitted:
+                        st.session_state.breaking_news_title = new_bn_title.strip()
+                        st.session_state.breaking_news_link = new_bn_link.strip()
+                        st.success("Breaking news banner updated successfully!")
+                        time.sleep(0.5)
+                        st.rerun()
+
+                st.markdown("---")
+                if st.button("Log Out Admin"):
+                    st.session_state.admin_logged_in = False
+                    st.rerun()
 
 # Run the broadcast frame
 render_tsn_broadcast_center(ACTIVE_LAT, ACTIVE_LON, location_name)
