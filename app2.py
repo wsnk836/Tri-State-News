@@ -669,7 +669,7 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
         unsafe_allow_html=True,
     )
 
-    # Display existing announcements
+    # Display existing announcements (emails remain private)
     for ann in st.session_state.community_announcements:
       st.markdown(
           f"""
@@ -685,10 +685,13 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
           unsafe_allow_html=True,
       )
 
-    # Submission form inside an expander to keep layout clean
+    # Submission form with mandatory email requirement and dispatch to wsnk836@gmail.com via Web3Forms
     with st.expander("➕ Post New Community Announcement"):
       with st.form("community_announcement_form"):
         ann_author = st.text_input("Your Name / Organization *")
+        ann_email = st.text_input(
+            "Your Email Address * (Required for verification, kept private)"
+        )
         ann_title = st.text_input("Announcement Title *")
         ann_text = st.text_area("Announcement Details *")
         ann_submitted = st.form_submit_button(
@@ -696,12 +699,24 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
         )
 
         if ann_submitted:
-          if not ann_author.strip() or not ann_title.strip() or not ann_text.strip():
-            st.error("Please fill in all required announcement fields.")
+          if (
+              not ann_author.strip()
+              or not ann_email.strip()
+              or not ann_title.strip()
+              or not ann_text.strip()
+          ):
+            st.error(
+                "Please fill in all required fields, including your email"
+                " address."
+            )
+          elif "@" not in ann_email or "." not in ann_email:
+            st.error("Please enter a valid email address.")
           else:
             current_timestamp = datetime.now(ZoneInfo("America/Chicago")).strftime(
                 "%b %d, %I:%M %p"
             )
+
+            # Add to local session state list (excluding email so it remains private on the public board)
             st.session_state.community_announcements.insert(
                 0,
                 {
@@ -711,7 +726,51 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
                     "time": current_timestamp,
                 },
             )
-            st.success("Announcement published successfully!")
+
+            # Client-side JS trigger to send a copy to wsnk836@gmail.com using Web3Forms
+            safe_author = ann_author.strip().replace("'", "\\'")
+            safe_email = ann_email.strip().replace("'", "\\'")
+            safe_title = ann_title.strip().replace("'", "\\'")
+            safe_text = ann_text.strip().replace("'", "\\'").replace("\n", " ")
+
+            dispatch_js = f"""
+                        <script>
+                        async function sendAnnouncementCopy() {{
+                            const payload = {{
+                                access_key: "6f59571f-f519-4655-9b50-095eed178152",
+                                subject: "📢 New Community Announcement: {safe_title}",
+                                name: "{safe_author}",
+                                email: "{safe_email}",
+                                message: "Title: {safe_title}\\nAuthor: {safe_author}\\nSubmitter Email: {safe_email}\\n\\nDetails:\\n{safe_text}"
+                            }};
+                            try {{
+                                let response = await fetch("https://api.web3forms.com/submit", {{
+                                    method: "POST",
+                                    headers: {{
+                                        "Content-Type": "application/json",
+                                        "Accept": "application/json"
+                                    }},
+                                    body: JSON.stringify(payload)
+                                }});
+                                let data = await response.json();
+                                if (data.success) {{
+                                    console.log("Announcement copy sent to wsnk836@gmail.com successfully");
+                                }} else {{
+                                    console.error("Failed to email announcement copy:", data.message);
+                                }}
+                            }} catch (err) {{
+                                console.error("Network error dispatching announcement copy:", err);
+                            }}
+                        }}
+                        sendAnnouncementCopy();
+                        </script>
+                        """
+            components.html(dispatch_js, height=0)
+
+            st.success(
+                "Announcement published successfully! A copy has been sent to"
+                " the TSN desk."
+            )
             time.sleep(0.3)
             st.rerun()
 
