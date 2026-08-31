@@ -353,4 +353,253 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
     alerts_response = requests.get(alerts_url, headers=headers, timeout=10).json()
     alerts = alerts_response.get("features", [])
 
-    if len(alerts) >
+    if len(alerts) > 0:
+      for alert in alerts:
+        props = alert.get("properties", {})
+        event = props.get("event", "Weather Alert")
+        headline = props.get("headline", "Severe weather advisory issued.")
+        description = props.get("description", "No details provided.")
+        severity = props.get("severity", "Unknown")
+        status_color = (
+            "#ef4444" if severity in ["Extreme", "Severe"] else "#f87171"
+        )
+
+        st.markdown(
+            f"""
+                <div class="alert-severe" style="border-left-color: {status_color};">
+                    <strong style="color: {status_color};">🚨 TSN BULLETIN: {event}</strong><br/>
+                    <span style="color: #f4f4f5; font-size: 0.92rem; margin-top: 4px; display: block;">{headline}</span>
+                </div>
+                """,
+            unsafe_allow_html=True,
+        )
+        with st.expander("📄 View Full Emergency Statement"):
+          st.write(description)
+    else:
+      st.markdown(
+          f"""
+            <div class="alert-clear">
+                🟢 <strong>TSN STATUS:</strong> All clear. No active severe warnings for {loc_label}.
+            </div>
+            """,
+          unsafe_allow_html=True,
+      )
+  except Exception as e:
+    st.error(f"Alert telemetry feed unreachable: {e}")
+
+  # --- FETCH NWS POINTS & FORECAST ---
+  try:
+    points_url = f"https://api.weather.gov/points/{lat},{lon}"
+    points_res = requests.get(points_url, headers=headers, timeout=10)
+
+    if points_res.status_code != 200:
+      st.error(
+          "NWS Grid Server error. Coordinates may fall outside US jurisdiction."
+      )
+      return
+
+    points_data = points_res.json()
+    radar_station = points_data["properties"].get("radarStation", "KDVN")
+    forecast_url = points_data["properties"].get("forecast")
+
+    forecast_res = requests.get(forecast_url, headers=headers, timeout=10)
+    forecast_data = forecast_res.json()
+    periods = forecast_data["properties"]["periods"]
+    current = periods[0]
+
+  except Exception as e:
+    st.error(f"Error establishing NWS data link: {e}")
+    return
+
+  # --- LAYOUT: BIGGER RADAR PROMINENTLY DISPLAYED ---
+  col_radar, col_outlook = st.columns([1.5, 1], gap="large")
+
+  with col_radar:
+    st.markdown(
+        f"""
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <h3 style="margin: 0; color: #f87171; font-size: 1.2rem;">📡 LIVE DOPPLER RADAR NETWORK ({radar_station})</h3>
+            <span style="font-size: 0.8rem; color: #a1a1aa;">HD STREAM • 60s REFRESH</span>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    radar_url = f"https://radar.weather.gov/ridge/standard/{radar_station}_loop.gif?t={int(time.time())}"
+    st.markdown('<div class="radar-container">', unsafe_allow_html=True)
+    st.image(radar_url, use_container_width=True)
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    st.markdown("<div style='margin-top: 15px;'></div>", unsafe_allow_html=True)
+    m1, m2, m3 = st.columns(3)
+    with m1:
+      st.metric(
+          "🌡️ Temp", f"{current['temperature']}°{current['temperatureUnit']}"
+      )
+    with m2:
+      st.metric("💨 Wind", f"{current['windSpeed']}")
+    with m3:
+      st.metric("☁️ Conditions", current["shortForecast"])
+
+  with col_outlook:
+    st.markdown(
+        f"""
+        <div class="broadcast-panel" style="margin-top: 0;">
+            <h3 style="color: #f87171; margin-top: 0; font-size: 1.2rem;">📊 METEOROLOGICAL DESK</h3>
+            <p style="color: #d4d4d8; font-size: 0.9rem; line-height: 1.5; margin-bottom: 15px;">
+                {current['detailedForecast']}
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    daily_forecasts = []
+    i = 0
+    while i < len(periods):
+      p = periods[i]
+      if p["isDaytime"]:
+        day_name = p["name"]
+        day_detailed = p["detailedForecast"]
+        high_temp = f"{p['temperature']}°{p['temperatureUnit']}"
+        wind_speed = p["windSpeed"]
+        wind_dir = p.get("windDirection", "")
+        low_temp = "N/A"
+        night_detailed = ""
+
+        if i + 1 < len(periods) and not periods[i + 1]["isDaytime"]:
+          night_p = periods[i + 1]
+          low_temp = f"{night_p['temperature']}°{night_p['temperatureUnit']}"
+          night_detailed = night_p["detailedForecast"]
+          i += 1
+
+        daily_forecasts.append({
+            "day": day_name,
+            "high": high_temp,
+            "low": low_temp,
+            "detailed": day_detailed,
+            "low_detailed": night_detailed,
+            "wind_speed": wind_speed,
+            "wind_dir": wind_dir,
+        })
+      else:
+        night_name = p["name"]
+        day_label = (
+            "Today"
+            if night_name.lower() == "tonight"
+            else night_name.replace(" Night", "").strip()
+        )
+        low_temp = f"{p['temperature']}°{p['temperatureUnit']}"
+        night_detailed = p["detailedForecast"]
+        wind_speed = p["windSpeed"]
+        wind_dir = p.get("windDirection", "")
+        high_temp = "N/A"
+        day_detailed = ""
+
+        if i + 1 < len(periods) and periods[i + 1]["isDaytime"]:
+          day_p = periods[i + 1]
+          high_temp = f"{day_p['temperature']}°{day_p['temperatureUnit']}"
+          day_detailed = day_p["detailedForecast"]
+          i += 1
+
+        daily_forecasts.append({
+            "day": day_label,
+            "high": high_temp,
+            "low": low_temp,
+            "detailed": day_detailed,
+            "low_detailed": night_detailed,
+            "wind_speed": wind_speed,
+            "wind_dir": wind_dir,
+        })
+      i += 1
+
+    if (
+        not st.session_state.selected_forecast_day
+        or st.session_state.selected_forecast_day
+        not in [d["day"] for d in daily_forecasts]
+    ):
+      st.session_state.selected_forecast_day = daily_forecasts[0]["day"]
+
+    st.markdown(
+        "<h4 style='color: #fafafa; font-size: 1rem; margin-bottom: 8px;'>📅"
+        " 7-Day Regional Outlook</h4>",
+        unsafe_allow_html=True,
+    )
+    tab3, tab7 = st.tabs(["3-Day Grid", "Full 7-Day Grid"])
+
+    with tab3:
+      days_3 = daily_forecasts[:3]
+      cols3 = st.columns(len(days_3))
+      for idx, d_item in enumerate(days_3):
+        with cols3[idx]:
+          is_selected = d_item["day"] == st.session_state.selected_forecast_day
+          btn_label = f"📍 {d_item['day']}" if is_selected else d_item["day"]
+          if st.button(
+              btn_label, key=f"btn_3_{idx}_{d_item['day']}", use_container_width=True
+          ):
+            st.session_state.selected_forecast_day = d_item["day"]
+            st.rerun()
+
+    with tab7:
+      days_7 = daily_forecasts[:7]
+      cols7 = st.columns(len(days_7))
+      for idx, d_item in enumerate(days_7):
+        with cols7[idx]:
+          is_selected = d_item["day"] == st.session_state.selected_forecast_day
+          btn_label = f"📍 {d_item['day']}" if is_selected else d_item["day"]
+          if st.button(
+              btn_label, key=f"btn_7_{idx}_{d_item['day']}", use_container_width=True
+          ):
+            st.session_state.selected_forecast_day = d_item["day"]
+            st.rerun()
+
+    selected_record = next(
+        (
+            d
+            for d in daily_forecasts
+            if d["day"] == st.session_state.selected_forecast_day
+        ),
+        daily_forecasts[0],
+    )
+
+    st.markdown(
+        f"""
+        <div style="background: rgba(18, 19, 26, 0.95); border: 1px solid #27272a; border-left: 3px solid #ef4444; border-radius: 8px; padding: 14px; margin-top: 12px;">
+            <div style="font-weight: 700; color: #f87171; font-size: 0.95rem; margin-bottom: 6px;">
+                📋 REPORT • {selected_record['day']}
+            </div>
+            {f'<div style="font-size: 0.85rem; color: #f4f4f5; margin-bottom: 6px;"><strong>Day:</strong> {selected_record["detailed"]}</div>' if selected_record['detailed'] else ''}
+            {f'<div style="font-size: 0.85rem; color: #d4d4d8; margin-bottom: 8px;"><strong>Night:</strong> {selected_record["low_detailed"]}</div>' if selected_record['low_detailed'] else ''}
+            <div style="display: flex; gap: 15px; font-size: 0.8rem; color: #a1a1aa; border-top: 1px solid #27272a; padding-top: 6px;">
+                <div>High: <strong style="color: #fafafa;">{selected_record['high']}</strong></div>
+                <div>Low: <strong style="color: #fafafa;">{selected_record['low']}</strong></div>
+                <div>Wind: <strong style="color: #fafafa;">{selected_record['wind_speed']}</strong></div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+render_tsn_broadcast_center(ACTIVE_LAT, ACTIVE_LON, location_name)
+
+# ==========================================
+# --- COMMUNITY FEEDBACK DESK (CLIENT-SIDE) ---
+# ==========================================
+st.markdown("<div style='margin: 30px 0 10px 0;'></div>", unsafe_allow_html=True)
+
+feedback_component_code = """
+<div style="background: rgba(18, 19, 26, 0.95); border: 1px solid #27272a; border-top: 3px solid #ef4444; border-radius: 12px; padding: 20px; font-family: system-ui, -apple-system, sans-serif; color: #f4f4f5; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);">
+    <h3 style="color: #f87171; margin-top: 0; font-size: 1.2rem;">💬 TSN VIEWER & COMMUNITY FEEDBACK DESK</h3>
+    <p style="color: #a1a1aa; font-size: 0.9rem; margin-bottom: 15px;">
+        Have news tips, weather updates, or suggestions for the network? Send your message directly to the TSN desk at <strong style="color: #fafafa;">wsnk836@gmail.com</strong>.
+    </p>
+    <div style="margin-bottom: 12px;">
+        <label style="display: block; font-size: 0.85rem; color: #a1a1aa; margin-bottom: 4px; font-weight: 600; text-transform: uppercase;">Viewer Name *</label>
+        <input type="text" id="fb_name" placeholder="Your Name" style="width: 100%; padding: 10px; background: #08090c; border: 1px solid #27272a; border-radius: 6px; color: #f4f4f5; font-size: 0.9rem; box-sizing: border-box;">
+    </div>
+    <div style="margin-bottom: 12px;">
+        <label style="display: block; font-size: 0.85rem; color: #a1a1aa; margin-bottom: 4px; font-weight: 600; text-transform: uppercase;">Your Location / Grid (Optional)</label>
+        <input type="text" id="fb_loc" placeholder="City or ZIP" style="width: 100%; padding: 10px; background: #08090c; border: 1px solid #27272a; border-radius: 6px; color: #f4f4f5; font-size: 0.9rem; box-sizing: border-box;">
+    </div>
+    <div style="margin-bottom: 15px;">
+        <label style="display: block; font-size: 0.85rem; color: #a1a1
