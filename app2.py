@@ -220,30 +220,49 @@ except ValueError:
   ACTIVE_LON = float(default_lon)
   location_name = "Chicago, IL"
 
-# --- NETWORK HEADER ---
-st.markdown(
-    """
-<div class="tsn-header-bar"></div>
-<div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 15px;">
-    <div>
-        <h1 style="color: #ffffff; margin: 0; font-size: 2.4rem; font-weight: 900; letter-spacing: -0.03em;">
+# --- NETWORK HEADER WITH LOGO ---
+st.markdown('<div class="tsn-header-bar"></div>', unsafe_allow_html=True)
+
+col_logo, col_title, col_badge = st.columns([0.6, 3.4, 1.2], vertical_alignment="bottom")
+
+with col_logo:
+  try:
+    st.image(
+        "777468448_1567274085055308_6458077729241826651_n_2.jpg", width=110
+    )
+  except Exception:
+    st.markdown(
+        "<h3 style='color: #ef4444; margin:0;'>TSN</h3>",
+        unsafe_allow_html=True,
+    )
+
+with col_title:
+  st.markdown(
+      """
+        <h1 style="color: #ffffff; margin: 0; font-size: 2.2rem; font-weight: 900; letter-spacing: -0.03em; line-height: 1.1;">
             TSN <span style="color: #ef4444;">NEWS NETWORK</span>
         </h1>
-        <p style="color: #a1a1aa; margin: 4px 0 0 0; font-size: 0.95rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em;">
+        <p style="color: #a1a1aa; margin: 2px 0 0 0; font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em;">
             Tri-State Weather Center & Live Telemetry
         </p>
-    </div>
-    <div style="text-align: right;">
-        <span class="tsn-live-badge">LIVE DESK</span>
-        <div style="color: #d4d4d8; font-size: 0.85rem; font-weight: 700; margin-top: 6px;">
-            TARGET GRID: <span style="color: #ef4444;">%s</span>
+        """,
+      unsafe_allow_html=True,
+  )
+
+with col_badge:
+  st.markdown(
+      f"""
+        <div style="text-align: right;">
+            <span class="tsn-live-badge">LIVE DESK</span>
+            <div style="color: #d4d4d8; font-size: 0.8rem; font-weight: 700; margin-top: 6px;">
+                TARGET GRID: <span style="color: #ef4444;">{location_name}</span>
+            </div>
         </div>
-    </div>
-</div>
-"""
-    % location_name,
-    unsafe_allow_html=True,
-)
+        """,
+      unsafe_allow_html=True,
+  )
+
+st.markdown("<div style='margin-bottom: 15px;'></div>", unsafe_allow_html=True)
 
 # --- NEWS TICKER ---
 cst_time = datetime.now(ZoneInfo("America/Chicago")).strftime(
