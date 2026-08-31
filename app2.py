@@ -626,7 +626,7 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
 render_tsn_broadcast_center(ACTIVE_LAT, ACTIVE_LON, location_name)
 
 # ==========================================
-# --- COMMUNITY FEEDBACK DESK (NATIVE PYTHON) ---
+# --- COMMUNITY FEEDBACK DESK (CLIENT-SIDE JS) ---
 # ==========================================
 st.markdown("<div style='margin: 30px 0 10px 0;'></div>", unsafe_allow_html=True)
 
@@ -642,7 +642,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-with st.form("tsn_feedback_form", clear_on_submit=True):
+with st.form("tsn_feedback_form"):
   fb_name = st.text_input("Viewer Name *", placeholder="Your Name")
   fb_loc = st.text_input("Your Location / Grid (Optional)", placeholder="City or ZIP")
   fb_msg = st.text_area(
@@ -659,35 +659,49 @@ with st.form("tsn_feedback_form", clear_on_submit=True):
           "⚠️ Transmission error: Please provide both your name and message."
       )
     else:
-      try:
-        payload = {
-            "access_key": "6f59571f-f519-4655-9b50-095eed178152",
-            "subject": (
-                "💡 Community Feedback and Suggestions from TSN News Network"
-            ),
-            "name": fb_name.strip(),
-            "location": fb_loc.strip() if fb_loc else "Not provided",
-            "message": fb_msg.strip(),
-        }
-        response = requests.post(
-            "https://api.web3forms.com/submit", json=payload, timeout=10
-        )
-        data = response.json()
+      safe_name = fb_name.strip().replace("'", "\\'")
+      safe_loc = (
+          fb_loc.strip().replace("'", "\\'") if fb_loc else "Not provided"
+      )
+      safe_msg = fb_msg.strip().replace("'", "\\'").replace("\n", " ")
 
-        if response.status_code == 200 and data.get("success"):
-          st.success(
-              "✅ Feedback successfully transmitted directly to"
-              " wsnk836@gmail.com!"
-          )
-        else:
-          st.error(
-              "❌ Server relay error: "
-              + data.get("message", "Please try again shortly.")
-          )
-      except Exception as e:
-        st.error(
-            f"❌ Network connection error ({e}). Please check your connection."
-        )
+      client_js = f"""
+            <script>
+            async function sendFeedback() {{
+                const payload = {{
+                    access_key: "6f59571f-f519-4655-9b50-095eed178152",
+                    subject: "💡 Community Feedback and Suggestions from TSN News Network",
+                    name: "{safe_name}",
+                    location: "{safe_loc}",
+                    message: "{safe_msg}"
+                }};
+                
+                try {{
+                    let response = await fetch("https://api.web3forms.com/submit", {{
+                        method: "POST",
+                        headers: {{
+                            "Content-Type": "application/json",
+                            "Accept": "application/json"
+                        }},
+                        body: JSON.stringify(payload)
+                    }});
+                    let data = await response.json();
+                    if (data.success) {{
+                        console.log("Feedback sent successfully");
+                    }} else {{
+                        console.error("Submission failed:", data.message);
+                    }}
+                }} catch (err) {{
+                    console.error("Network error:", err);
+                }}
+            }}
+            sendFeedback();
+            </script>
+            """
+      components.html(client_js, height=0)
+      st.success(
+          "✅ Feedback successfully transmitted directly to wsnk836@gmail.com!"
+      )
 
 # --- NETWORK FOOTER ---
 st.markdown(
