@@ -896,6 +896,22 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
                         st.rerun()
 
                 st.markdown("---")
+                st.markdown("<h4 style='color: #0f172a; font-size: 1.1rem; font-weight: 800;'>📢 Manage Community Announcements</h4>", unsafe_allow_html=True)
+                if len(st.session_state.community_announcements) == 0:
+                    st.info("No active community announcements to manage.")
+                else:
+                    for idx, ann in enumerate(st.session_state.community_announcements):
+                        col_ann_info, col_ann_del = st.columns([4, 1], vertical_alignment="center")
+                        with col_ann_info:
+                            st.markdown(f"**{ann['title']}** (by *{ann['author']}* - {ann['time']})")
+                        with col_ann_del:
+                            if st.button("Delete", key=f"admin_del_notice_{idx}", use_container_width=True):
+                                st.session_state.community_announcements.pop(idx)
+                                st.success("Announcement deleted by admin.")
+                                time.sleep(0.5)
+                                st.rerun()
+
+                st.markdown("---")
                 if st.button("Log Out Admin"):
                     st.session_state.admin_logged_in = False
                     st.rerun()
