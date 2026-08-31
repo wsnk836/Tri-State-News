@@ -1,6 +1,4 @@
-import base64
 from datetime import datetime
-import os
 import time
 from zoneinfo import ZoneInfo
 import requests
@@ -56,42 +54,37 @@ localStorage_sync_code = """
 """
 components.html(localStorage_sync_code, height=0)
 
-# --- DIRECT BASE64 EMBEDDED TSN LOGO BACKGROUND ---
-# This hardcodes your uploaded TSN logo directly into the Python script as a vertical background pattern
-embedded_tsn_logo_b64 = (
-    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
-)
+# --- SELF-CONTAINED "TSN TRI-STATE NEWS" BACKGROUND PATTERN ---
+import urllib.parse
 
-background_image_path = (
-    "777468448_1567274085055308_6458077729241826651_n.jpg"
-)
+tsn_svg_background = """<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500" viewBox="0 0 500 500">
+    <defs>
+        <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#14151a"/>
+            <stop offset="100%" stop-color="#0c0d10"/>
+        </linearGradient>
+    </defs>
+    <rect width="100%" height="100%" fill="url(#grad)"/>
+    <g opacity="0.05" stroke="#ef4444" stroke-width="1">
+        <path d="M0 0h500v500H0z" fill="none"/>
+        <path d="M0 125h500M0 250h500M0 375h500M125 0v500M250 0v500M375 0v500"/>
+    </g>
+    <text x="50%" y="45%" dominant-baseline="middle" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="96" fill="#ef4444" opacity="0.08" letter-spacing="4">TSN</text>
+    <text x="50%" y="58%" dominant-baseline="middle" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-weight="700" font-size="20" fill="#a1a1aa" opacity="0.1" letter-spacing="6">TRI-STATE NEWS</text>
+</svg>"""
 
+encoded_svg = urllib.parse.quote(tsn_svg_background)
+background_css_value = f"url('data:image/svg+xml;utf8,{encoded_svg}')"
 
-def get_base64_of_bin_file(bin_file):
-  if os.path.exists(bin_file):
-    with open(bin_file, "rb") as f:
-      data = f.read()
-    return base64.b64encode(data).decode()
-  return ""
-
-
-img_base64 = get_base64_of_bin_file(background_image_path)
-if not img_base64:
-  # Fallback to hardcoded string representation if file is missing in container execution
-  img_base64 = embedded_tsn_logo_b64
-
-background_css_value = f"url('data:image/jpeg;base64,{img_base64}')"
-
-# --- TACTICAL CRIMSON & CARBON CSS WITH VERTICAL REPEATING TSN LOGO BACKGROUND ---
+# --- TACTICAL CRIMSON & CARBON CSS WITH VERTICAL REPEATING TSN BACKGROUND ---
 st.markdown(
     f"""
 <style>
     .stApp {{
-        background: linear-gradient(rgba(12, 13, 16, 0.92), rgba(12, 13, 16, 0.92)), 
+        background: linear-gradient(rgba(12, 13, 16, 0.94), rgba(12, 13, 16, 0.94)), 
                     {background_css_value};
-        background-repeat: repeat-y;
-        background-size: 260px auto;
-        background-position: center top;
+        background-repeat: repeat;
+        background-size: 400px 400px;
         background-attachment: fixed;
         color: #f4f4f5;
         font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -115,11 +108,15 @@ st.markdown(
         gap: 14px;
         letter-spacing: -0.02em;
     }}
-    .hero-logo {{
-        height: 42px;
-        width: 42px;
-        object-fit: contain;
-        border-radius: 6px;
+    .hero-logo-badge {{
+        background: rgba(239, 68, 68, 0.15);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        color: #f87171;
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        font-weight: 900;
+        letter-spacing: 1px;
     }}
     .hero-subtitle {{
         color: #a1a1aa;
@@ -228,14 +225,12 @@ except ValueError:
   ACTIVE_LON = float(default_lon)
   location_name = "Marcus, IA"
 
-# --- HERO HEADER WITH LOGO ---
-company_logo_url = f"data:image/jpeg;base64,{img_base64}"
-
+# --- HERO HEADER WITH TSN BADGE ---
 st.markdown(
-    f"""
+    """
 <div class="hero-banner">
     <div class="hero-title">
-        <img src="{company_logo_url}" class="hero-logo" alt="Logo"/>
+        <span class="hero-logo-badge">TSN</span>
         Tri State News
     </div>
     <div class="hero-subtitle">Real-time NWS Telemetry & Regional Operations</div>
