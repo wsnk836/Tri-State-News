@@ -56,7 +56,7 @@ localStorage_sync_code = """
 """
 components.html(localStorage_sync_code, height=0)
 
-# --- LOAD BACKGROUND IMAGE AS BASE64 ---
+# --- BACKGROUND IMAGE RESOLUTION (LOCAL FILE OR UPLOADER FALLBACK) ---
 background_image_path = (
     "777468448_1567274085055308_6458077729241826651_n.jpg"
 )
@@ -71,6 +71,19 @@ def get_base64_of_bin_file(bin_file):
 
 
 img_base64 = get_base64_of_bin_file(background_image_path)
+
+# If the local file isn't found in the environment, allow uploading it via sidebar
+with st.sidebar:
+  st.markdown("### ⚙️ App Settings")
+  uploaded_bg = st.file_uploader(
+      "Upload Background/Logo Image (.jpg/.png)", type=["jpg", "jpeg", "png"]
+  )
+  if uploaded_bg is not None:
+    img_base64 = base64.b64encode(uploaded_bg.getvalue()).decode()
+    # Save locally so it persists for the session
+    with open(background_image_path, "wb") as f:
+      f.write(uploaded_bg.getvalue())
+
 background_css_value = (
     f"url('data:image/jpeg;base64,{img_base64}')"
     if img_base64
