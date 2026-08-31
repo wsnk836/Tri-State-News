@@ -203,6 +203,16 @@ st.markdown(
         font-size: 1.5rem !important;
         font-weight: 800 !important;
     }
+    /* Explicit high-contrast background and text color styling for input fields and text areas */
+    input, textarea, [data-baseweb="input"] input, [data-baseweb="textarea"] textarea {
+        background-color: #ffffff !important;
+        color: #0f172a !important;
+        -webkit-text-fill-color: #0f172a !important;
+    }
+    input::placeholder, textarea::placeholder {
+        color: #64748b !important;
+        -webkit-text-fill-color: #64748b !important;
+    }
     .stTabs [data-baseweb="tab-list"] { gap: 6px; background-color: transparent; }
     .stTabs [data-baseweb="tab"] {
         border-radius: 6px;
@@ -1033,7 +1043,7 @@ with st.form("tsn_feedback_form"):
             """
             components.html(client_js, height=0)
             st.success(
-                "✅ Feedback successfully transmitted directly to wsnk836@gmail.com!"
+                "✅ Feedback successfully transmitted directly to news@tsnnet.org!"
             )
 
 # --- NETWORK FOOTER ---
