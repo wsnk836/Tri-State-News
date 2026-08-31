@@ -968,7 +968,7 @@ st.markdown(
 <div style="background: #ffffff; border: 1px solid #cbd5e1; border-top: 3px solid #dc2626; border-radius: 12px; padding: 20px; font-family: system-ui, -apple-system, sans-serif; color: #0f172a; box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);">
     <h3 style="color: #0f172a; margin-top: 0; font-size: 1.2rem; font-weight: 800;">💬 TSN VIEWER & COMMUNITY FEEDBACK DESK</h3>
     <p style="color: #334155; font-size: 0.95rem; font-weight: 500; margin-bottom: 15px;">
-        Have news tips, weather updates, or suggestions for the network? Send your message directly to the TSN desk at <strong style="color: #dc2626;">wsnk836@gmail.com</strong>.
+        Have news tips, weather updates, or suggestions for the network? Send your message directly to the TSN desk at <strong style="color: #dc2626;">news@tsnnet.org</strong>.
     </p>
 </div>
 """,
