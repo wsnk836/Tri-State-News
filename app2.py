@@ -56,7 +56,12 @@ localStorage_sync_code = """
 """
 components.html(localStorage_sync_code, height=0)
 
-# --- BACKGROUND IMAGE RESOLUTION (LOCAL FILE OR UPLOADER FALLBACK) ---
+# --- DIRECT BASE64 EMBEDDED TSN LOGO BACKGROUND ---
+# This hardcodes your uploaded TSN logo directly into the Python script as a vertical background pattern
+embedded_tsn_logo_b64 = (
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+)
+
 background_image_path = (
     "777468448_1567274085055308_6458077729241826651_n.jpg"
 )
@@ -71,34 +76,21 @@ def get_base64_of_bin_file(bin_file):
 
 
 img_base64 = get_base64_of_bin_file(background_image_path)
+if not img_base64:
+  # Fallback to hardcoded string representation if file is missing in container execution
+  img_base64 = embedded_tsn_logo_b64
 
-# If the local file isn't found in the environment, allow uploading it via sidebar
-with st.sidebar:
-  st.markdown("### ⚙️ App Settings")
-  uploaded_bg = st.file_uploader(
-      "Upload Background/Logo Image (.jpg/.png)", type=["jpg", "jpeg", "png"]
-  )
-  if uploaded_bg is not None:
-    img_base64 = base64.b64encode(uploaded_bg.getvalue()).decode()
-    # Save locally so it persists for the session
-    with open(background_image_path, "wb") as f:
-      f.write(uploaded_bg.getvalue())
+background_css_value = f"url('data:image/jpeg;base64,{img_base64}')"
 
-background_css_value = (
-    f"url('data:image/jpeg;base64,{img_base64}')"
-    if img_base64
-    else "url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1920&auto=format&fit=crop')"
-)
-
-# --- TACTICAL CRIMSON & CARBON CSS WITH VERTICAL REPEATING BACKGROUND ---
+# --- TACTICAL CRIMSON & CARBON CSS WITH VERTICAL REPEATING TSN LOGO BACKGROUND ---
 st.markdown(
     f"""
 <style>
     .stApp {{
-        background: linear-gradient(rgba(12, 13, 16, 0.93), rgba(12, 13, 16, 0.93)), 
+        background: linear-gradient(rgba(12, 13, 16, 0.92), rgba(12, 13, 16, 0.92)), 
                     {background_css_value};
         background-repeat: repeat-y;
-        background-size: 280px auto;
+        background-size: 260px auto;
         background-position: center top;
         background-attachment: fixed;
         color: #f4f4f5;
@@ -237,11 +229,7 @@ except ValueError:
   location_name = "Marcus, IA"
 
 # --- HERO HEADER WITH LOGO ---
-company_logo_url = (
-    f"data:image/jpeg;base64,{img_base64}"
-    if img_base64
-    else "https://api.iconify.design/lucide:radio-tower.svg?color=%23f87171"
-)
+company_logo_url = f"data:image/jpeg;base64,{img_base64}"
 
 st.markdown(
     f"""
