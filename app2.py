@@ -13,6 +13,9 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
+# --- CONFIGURE YOUR SHARED GOOGLE SHEET WEB APP URL HERE ---
+GOOGLE_SHEET_WEB_APP_URL = "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE"
+
 # --- PWA STATIC MANIFEST INCORPORATION ---
 pwa_manifest_code = """
 <script>
@@ -376,22 +379,6 @@ if "breaking_news_link" not in st.session_state:
     st.session_state.breaking_news_link = (
         "https://www.facebook.com/p/Tri-State-News-100078393567762/"
     )
-
-if "community_announcements" not in st.session_state:
-    st.session_state.community_announcements = [
-        {
-            "author": "TSN Desk",
-            "contact": "wsnk836@gmail.com",
-            "title": "Welcome to Tri-State Announcements",
-            "text": (
-                "Use the submission form below to broadcast local notices,"
-                " community events, or missing item alerts instantly to the public board."
-            ),
-            "time": datetime.now(ZoneInfo("America/Chicago")).strftime(
-                "%b %d, %I:%M %p"
-            ),
-        },
-    ]
 
 if "feedback_list" not in st.session_state:
     st.session_state.feedback_list = []
@@ -758,10 +745,25 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
             unsafe_allow_html=True,
         )
 
-        if len(st.session_state.community_announcements) == 0:
+        # Fetch live community announcements from Google Sheets backend
+        community_announcements = []
+        try:
+            resp = requests.get(GOOGLE_SHEET_WEB_APP_URL, timeout=8)
+            if resp.status_code == 200:
+                community_announcements = resp.json()
+        except Exception:
+            community_announcements = [{
+                "author": "TSN Desk",
+                "contact": "wsnk836@gmail.com",
+                "title": "Welcome to Tri-State Announcements",
+                "text": "System operational. Broadcast backend connected.",
+                "time": datetime.now(ZoneInfo("America/Chicago")).strftime("%b %d, %I:%M %p")
+            }]
+
+        if len(community_announcements) == 0:
             st.info("No active community announcements on the board.")
         else:
-            for idx, ann in enumerate(st.session_state.community_announcements):
+            for idx, ann in enumerate(community_announcements):
                 st.markdown(
                     f"""
                     <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-left: 6px solid #dc2626; border-radius: 12px; padding: 22px; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.04);">
@@ -783,10 +785,13 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
                 
                 if st.session_state.admin_logged_in:
                     if st.button("🗑️ Remove Notice", key=f"remove_notice_{idx}"):
-                        st.session_state.community_announcements.pop(idx)
-                        st.success("Announcement removed successfully.")
-                        time.sleep(0.5)
-                        st.rerun()
+                        try:
+                            requests.post(GOOGLE_SHEET_WEB_APP_URL, json={"action": "delete", "row_index": idx}, timeout=8)
+                            st.success("Announcement removed successfully.")
+                            time.sleep(0.5)
+                            st.rerun()
+                        except Exception as e:
+                            st.error(f"Failed to delete: {e}")
                 st.markdown("</div></div>", unsafe_allow_html=True)
 
         # Native Streamlit Form for Community Announcements (Universal visibility)
@@ -802,16 +807,24 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
             if comm_submitted:
                 if comm_author.strip() and comm_contact.strip() and comm_title.strip() and comm_details.strip():
                     current_time_str = datetime.now(ZoneInfo("America/Chicago")).strftime("%b %d, %I:%M %p")
-                    st.session_state.community_announcements.insert(0, {
+                    payload = {
+                        "action": "add",
                         "author": comm_author.strip(),
                         "contact": comm_contact.strip(),
                         "title": comm_title.strip(),
                         "text": comm_details.strip(),
                         "time": current_time_str
-                    })
-                    st.success("Notice successfully broadcasted to the public board for all users to see!")
-                    time.sleep(0.6)
-                    st.rerun()
+                    }
+                    try:
+                        resp = requests.post(GOOGLE_SHEET_WEB_APP_URL, json=payload, timeout=8)
+                        if resp.status_code == 200:
+                            st.success("Notice successfully broadcasted to the public board for all users to see!")
+                            time.sleep(0.6)
+                            st.rerun()
+                        else:
+                            st.error("Backend error recording submission. Please check your web app URL.")
+                    except Exception as e:
+                        st.error(f"Connection error posting notice: {e}")
                 else:
                     st.error("Please fill out all required fields before broadcasting.")
 
@@ -910,20 +923,23 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
 
                 st.markdown("---")
                 st.markdown("<h4 style='color: #0f172a; font-size: 1.1rem; font-weight: 800;'>📢 Manage Community Announcements</h4>", unsafe_allow_html=True)
-                if len(st.session_state.community_announcements) == 0:
+                if len(community_announcements) == 0:
                     st.info("No active community announcements to manage.")
                 else:
-                    for idx, ann in enumerate(st.session_state.community_announcements):
+                    for idx, ann in enumerate(community_announcements):
                         col_ann_info, col_ann_del = st.columns([4, 1], vertical_alignment="center")
                         with col_ann_info:
                             contact_disp = ann.get('contact', 'None')
                             st.markdown(f"**{ann['title']}** (by *{ann['author']}* | Contact: `{contact_disp}`) - {ann['time']}")
                         with col_ann_del:
                             if st.button("Delete", key=f"admin_del_notice_{idx}", use_container_width=True):
-                                st.session_state.community_announcements.pop(idx)
-                                st.success("Announcement deleted by admin.")
-                                time.sleep(0.5)
-                                st.rerun()
+                                try:
+                                    requests.post(GOOGLE_SHEET_WEB_APP_URL, json={"action": "delete", "row_index": idx}, timeout=8)
+                                    st.success("Announcement deleted by admin.")
+                                    time.sleep(0.5)
+                                    st.rerun()
+                                except Exception as e:
+                                    st.error(f"Failed to delete: {e}")
 
                 st.markdown("---")
                 if st.button("Log Out Admin"):
