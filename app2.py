@@ -679,7 +679,7 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
             "Enter 6-Digit Admin PIN", type="password", max_chars=6
         )
         if st.button("Unlock Admin Mode"):
-          if admin_pin == "836836":
+          if admin_pin == "052723":
             st.session_state.admin_unlocked = True
             st.success("Admin mode unlocked!")
             time.sleep(0.5)
