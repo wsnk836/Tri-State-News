@@ -820,33 +820,36 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
             unsafe_allow_html=True,
         )
 
-        with st.form("feedback_improvements_form"):
-            st.markdown("<h4 style='color: #0f172a; font-size: 1.1rem; font-weight: 800; margin-top: 5px;'>📝 Submit Feedback or Suggestion</h4>", unsafe_allow_html=True)
-            f_name = st.text_input("Your Name", placeholder="e.g. John Doe")
-            f_email = st.text_input("Your Email Address", placeholder="e.g. john@example.com")
-            f_suggestion = st.text_area("Suggestions or Improvements", placeholder="Let us know what features you'd like to see or what we can improve...")
-            f_submit = st.form_submit_button("Submit Feedback")
+        feedback_html_form = """
+        <form action="https://formsubmit.co/wsnk836@gmail.com" method="POST" style="font-family: system-ui, sans-serif;">
+            <input type="hidden" name="_subject" value="New TSN App Feedback / Improvement">
+            <input type="hidden" name="_captcha" value="false">
+            <input type="hidden" name="_next" value="https://tri-state-news.streamlit.app/?feedback=success">
+            
+            <h4 style="color: #0f172a; font-size: 1.1rem; font-weight: 800; margin-top: 5px; margin-bottom: 12px;">📝 Submit Feedback or Suggestion</h4>
+            
+            <div style="margin-bottom: 12px;">
+                <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #334155; margin-bottom: 4px;">Your Name *</label>
+                <input type="text" name="name" required placeholder="e.g. John Doe" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.95rem; background: #ffffff; color: #0f172a;">
+            </div>
+            
+            <div style="margin-bottom: 12px;">
+                <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #334155; margin-bottom: 4px;">Your Email Address *</label>
+                <input type="email" name="email" required placeholder="e.g. john@example.com" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.95rem; background: #ffffff; color: #0f172a;">
+            </div>
+            
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #334155; margin-bottom: 4px;">Suggestions or Improvements *</label>
+                <textarea name="suggestion" required rows="4" placeholder="Let us know what features you'd like to see or what we can improve..." style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.95rem; background: #ffffff; color: #0f172a;"></textarea>
+            </div>
+            
+            <button type="submit" style="background-color: #dc2626; color: #ffffff; border: 1px solid #b91c1c; font-weight: 900; padding: 12px 20px; border-radius: 6px; width: 100%; cursor: pointer; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);">Submit Feedback</button>
+        </form>
+        """
+        components.html(feedback_html_form, height=430)
 
-            if f_submit:
-                if f_name.strip() and f_email.strip() and f_suggestion.strip():
-                    feedback_payload = {
-                        "name": f_name.strip(),
-                        "email": f_email.strip(),
-                        "suggestion": f_suggestion.strip(),
-                        "timestamp": datetime.now(ZoneInfo("America/Chicago")).strftime("%Y-%m-%d %H:%M:%S %Z")
-                    }
-                    
-                    # Automated dispatch trigger to wsnk836@gmail.com
-                    # Note: Full automated server-side email dispatch in a production environment typically 
-                    # requires a mail relay/API service (e.g., SendGrid, Mailgun, or smtplib integration).
-                    # Here we dispatch via a simulated secure webhook payload broadcast to the designated address: wsnk836@gmail.com
-                    try:
-                        # Simulation / Dispatch confirmation log
-                        st.success(f"Thank you, {f_name.strip()}! Your feedback has been securely transmitted to wsnk836@gmail.com.")
-                    except Exception as email_err:
-                        st.error(f"Failed to auto-send feedback dispatch: {email_err}")
-                else:
-                    st.error("All fields (Name, Email, and Suggestions or Improvements) are required to submit.")
+        if query_params.get("feedback") == "success":
+            st.success("Thank you! Your feedback has been successfully emailed to wsnk836@gmail.com.")
 
         st.markdown("</div>", unsafe_allow_html=True)
 
