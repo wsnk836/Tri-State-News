@@ -71,42 +71,42 @@ geolocation_bridge_code = (
 )
 components.html(geolocation_bridge_code, height=0)
 
-# --- PROFESSIONAL TSN BROADCAST NETWORK STYLING ---
+# --- PROFESSIONAL TSN BROADCAST NETWORK STYLING (HIGH CONTRAST THEME) ---
 st.markdown(
     """
 <style>
     .stApp {
-        background-color: #08090c;
-        color: #f4f4f5;
+        background-color: #f8fafc;
+        color: #0f172a;
         font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
     .tsn-header-bar {
-        background: linear-gradient(90deg, #b91c1c 0%, #ef4444 50%, #181922 100%);
+        background: linear-gradient(90deg, #dc2626 0%, #ef4444 50%, #1e293b 100%);
         padding: 4px 0;
         margin-bottom: 20px;
         border-radius: 6px;
-        box-shadow: 0 4px 20px rgba(185, 28, 28, 0.4);
+        box-shadow: 0 4px 20px rgba(220, 38, 38, 0.25);
     }
     .tsn-ticker {
-        background: #0f1015;
-        border-top: 1px solid #ef4444;
-        border-bottom: 1px solid #27272a;
-        color: #fca5a5;
-        padding: 8px 16px;
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
+        border-left: 5px solid #dc2626;
+        color: #0f172a;
+        padding: 10px 16px;
         font-weight: 700;
-        font-size: 0.88rem;
-        letter-spacing: 0.05em;
-        text-transform: uppercase;
+        font-size: 0.9rem;
+        letter-spacing: 0.03em;
         display: flex;
         align-items: center;
         gap: 12px;
-        border-radius: 4px;
+        border-radius: 6px;
         margin-bottom: 20px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     }
     .tsn-live-badge {
-        background: #ef4444;
+        background: #dc2626;
         color: #ffffff;
-        padding: 2px 8px;
+        padding: 3px 8px;
         border-radius: 4px;
         font-size: 0.75rem;
         font-weight: 900;
@@ -114,25 +114,25 @@ st.markdown(
     }
     @keyframes pulse {
         0% { opacity: 1; }
-        50% { opacity: 0.5; }
+        50% { opacity: 0.6; }
         100% { opacity: 1; }
     }
     .breaking-news-banner {
-        background: linear-gradient(135deg, rgba(185, 28, 28, 0.25) 0%, rgba(18, 19, 26, 0.95) 100%);
-        border: 1px solid rgba(239, 68, 68, 0.5);
-        border-left: 6px solid #ef4444;
+        background: #ffffff;
+        border: 2px solid #fca5a5;
+        border-left: 6px solid #dc2626;
         border-radius: 10px;
         padding: 16px 20px;
         margin-bottom: 25px;
-        box-shadow: 0 6px 20px rgba(185, 28, 28, 0.25);
+        box-shadow: 0 6px 20px rgba(220, 38, 38, 0.12);
         transition: transform 0.2s ease, border-color 0.2s ease;
     }
     .breaking-news-banner:hover {
-        border-color: #ef4444;
+        border-color: #dc2626;
         transform: translateY(-2px);
     }
     .breaking-news-link {
-        color: #ffffff;
+        color: #0f172a;
         text-decoration: none;
         display: flex;
         align-items: center;
@@ -140,23 +140,23 @@ st.markdown(
         width: 100%;
     }
     .breaking-news-link:hover {
-        color: #fca5a5;
+        color: #dc2626;
     }
     .broadcast-panel {
-        background: rgba(18, 19, 26, 0.95);
-        border: 1px solid #27272a;
-        border-top: 3px solid #ef4444;
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
+        border-top: 4px solid #dc2626;
         border-radius: 12px;
         padding: 20px;
         margin-bottom: 20px;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
     }
     .radar-wrapper {
-        background: linear-gradient(180deg, #12131c 0%, #090a0f 100%);
-        border: 1px solid rgba(239, 68, 68, 0.3);
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
         border-radius: 16px;
         padding: 18px;
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7), 0 0 20px rgba(239, 68, 68, 0.08);
+        box-shadow: 0 12px 40px rgba(15, 23, 42, 0.08);
         position: relative;
         overflow: hidden;
     }
@@ -164,65 +164,58 @@ st.markdown(
         position: relative;
         border-radius: 12px;
         overflow: hidden;
-        border: 1px solid #27272a;
-        background: #050508;
-    }
-    .radar-screen-inner::after {
-        content: " ";
-        display: block;
-        position: absolute;
-        top: 0; left: 0; bottom: 0; right: 0;
-        background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
-        z-index: 10;
-        background-size: 100% 4px, 6px 100%;
-        pointer-events: none;
+        border: 1px solid #94a3b8;
+        background: #000000;
     }
     .alert-severe {
-        background: rgba(239, 68, 68, 0.18);
-        border: 1px solid rgba(239, 68, 68, 0.4);
-        border-left: 5px solid #ef4444;
+        background: #fef2f2;
+        border: 1px solid #fca5a5;
+        border-left: 6px solid #dc2626;
         border-radius: 8px;
         padding: 14px 18px;
         margin-bottom: 12px;
+        color: #7f1d1d;
     }
     .alert-clear {
-        background: rgba(16, 185, 129, 0.12);
-        border: 1px solid rgba(16, 185, 129, 0.3);
-        border-left: 5px solid #10b981;
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        border-left: 6px solid #16a34a;
         border-radius: 8px;
         padding: 14px 18px;
         margin-bottom: 12px;
-        color: #d1fae5;
+        color: #14532d;
     }
     [data-testid="stMetric"] {
-        background: rgba(24, 25, 32, 0.9) !important;
-        border: 1px solid #27272a;
+        background: #ffffff !important;
+        border: 1px solid #cbd5e1 !important;
         border-radius: 10px;
         padding: 12px 16px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.04);
     }
     [data-testid="stMetricLabel"] {
-        color: #a1a1aa !important;
+        color: #475569 !important;
         font-size: 0.8rem !important;
         text-transform: uppercase;
+        font-weight: 700 !important;
     }
     [data-testid="stMetricValue"] {
-        color: #fafafa !important;
+        color: #0f172a !important;
         font-size: 1.5rem !important;
         font-weight: 800 !important;
     }
     .stTabs [data-baseweb="tab-list"] { gap: 6px; background-color: transparent; }
     .stTabs [data-baseweb="tab"] {
         border-radius: 6px;
-        background-color: #181922;
-        border: 1px solid #27272a;
-        color: #a1a1aa;
-        font-weight: 600;
+        background-color: #e2e8f0;
+        border: 1px solid #cbd5e1;
+        color: #334155;
+        font-weight: 700;
         font-size: 0.85rem;
     }
     .stTabs [aria-selected="true"] {
-        background: #ef4444 !important;
+        background: #dc2626 !important;
         color: #ffffff !important;
-        border-color: #ef4444 !important;
+        border-color: #dc2626 !important;
     }
     [data-testid="column"] {
         flex: 1 !important;
@@ -266,7 +259,7 @@ try:
     st.image("favicon_512.png", width=110)
 except Exception:
     st.markdown(
-        "<h3 style='color: #ef4444; margin:0;'>TSN</h3>",
+        "<h3 style='color: #dc2626; margin:0;'>TSN</h3>",
         unsafe_allow_html=True,
     )
 
@@ -275,10 +268,10 @@ col_title, col_badge = st.columns([3.5, 1.2], vertical_alignment="bottom")
 with col_title:
     st.markdown(
         """
-        <h1 style="color: #ffffff; margin: 0; font-size: 2.2rem; font-weight: 900; letter-spacing: -0.03em; line-height: 1.1;">
-            TSN <span style="color: #ef4444;">NEWS NETWORK</span>
+        <h1 style="color: #0f172a; margin: 0; font-size: 2.2rem; font-weight: 900; letter-spacing: -0.03em; line-height: 1.1;">
+            TSN <span style="color: #dc2626;">NEWS NETWORK</span>
         </h1>
-        <p style="color: #a1a1aa; margin: 2px 0 0 0; font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em;">
+        <p style="color: #475569; margin: 2px 0 0 0; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;">
             Tri-State Weather Center & Live Telemetry
         </p>
         """,
@@ -290,8 +283,8 @@ with col_badge:
         f"""
         <div style="text-align: right;">
             <span class="tsn-live-badge">LIVE DESK</span>
-            <div style="color: #d4d4d8; font-size: 0.8rem; font-weight: 700; margin-top: 6px;">
-                TARGET GRID: <span style="color: #ef4444;">{location_name}</span>
+            <div style="color: #334155; font-size: 0.8rem; font-weight: 800; margin-top: 6px;">
+                TARGET GRID: <span style="color: #dc2626;">{location_name}</span>
             </div>
         </div>
         """,
@@ -353,9 +346,9 @@ st.markdown(
     <a href="{st.session_state.breaking_news_link}" target="_blank" class="breaking-news-link">
         <div style="display: flex; align-items: center; gap: 12px;">
             <span class="tsn-live-badge">BREAKING NEWS</span>
-            <span style="font-size: 1.05rem; font-weight: 800; letter-spacing: -0.01em;">{st.session_state.breaking_news_title}</span>
+            <span style="font-size: 1.05rem; font-weight: 800; color: #0f172a; letter-spacing: -0.01em;">{st.session_state.breaking_news_title}</span>
         </div>
-        <div style="font-size: 0.85rem; color: #a1a1aa; font-weight: 600; display: flex; align-items: center; gap: 4px;">
+        <div style="font-size: 0.85rem; color: #dc2626; font-weight: 700; display: flex; align-items: center; gap: 4px;">
             <span>Read Update</span> &rarr;
         </div>
     </a>
@@ -499,14 +492,14 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
                 description = props.get("description", "No details provided.")
                 severity = props.get("severity", "Unknown")
                 status_color = (
-                    "#ef4444" if severity in ["Extreme", "Severe"] else "#f87171"
+                    "#dc2626" if severity in ["Extreme", "Severe"] else "#ea580c"
                 )
 
                 st.markdown(
                     f"""
                     <div class="alert-severe" style="border-left-color: {status_color};">
-                        <strong style="color: {status_color};">🚨 TSN BULLETIN: {event}</strong><br/>
-                        <span style="color: #f4f4f5; font-size: 0.92rem; margin-top: 4px; display: block;">{headline}</span>
+                        <strong style="color: {status_color}; font-size: 1rem;">🚨 TSN BULLETIN: {event}</strong><br/>
+                        <span style="color: #1e293b; font-size: 0.95rem; font-weight: 600; margin-top: 4px; display: block;">{headline}</span>
                     </div>
                     """,
                     unsafe_allow_html=True,
@@ -517,7 +510,7 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
             st.markdown(
                 f"""
                 <div class="alert-clear">
-                    🟢 <strong>TSN STATUS:</strong> All clear. No active severe warnings for {loc_label}.
+                    🟢 <strong style="color: #14532d;">TSN STATUS:</strong> All clear. No active severe warnings for {loc_label}.
                 </div>
                 """,
                 unsafe_allow_html=True,
@@ -557,12 +550,12 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
             f"""
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                 <div style="display: flex; align-items: center; gap: 8px;">
-                    <span style="width: 8px; height: 8px; background-color: #22c55e; border-radius: 50%; display: inline-block; box-shadow: 0 0 8px #22c55e;"></span>
-                    <h3 style="margin: 0; color: #f4f4f5; font-size: 1.1rem; font-weight: 800; letter-spacing: -0.01em;">LIVE DOPPLER • <span style="color: #ef4444;">{radar_station}</span></h3>
+                    <span style="width: 10px; height: 10px; background-color: #16a34a; border-radius: 50%; display: inline-block; box-shadow: 0 0 8px #16a34a;"></span>
+                    <h3 style="margin: 0; color: #0f172a; font-size: 1.1rem; font-weight: 800; letter-spacing: -0.01em;">LIVE DOPPLER • <span style="color: #dc2626;">{radar_station}</span></h3>
                 </div>
                 <div style="display: flex; align-items: center; gap: 6px;">
-                    <span style="background: rgba(239, 68, 68, 0.15); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); padding: 2px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 700;">HD VECTOR</span>
-                    <span style="background: rgba(24, 25, 32, 0.9); color: #a1a1aa; border: 1px solid #27272a; padding: 2px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 700;">60S REFRESH</span>
+                    <span style="background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; padding: 2px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 700;">HD VECTOR</span>
+                    <span style="background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; padding: 2px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 700;">60S REFRESH</span>
                 </div>
             </div>
             """,
@@ -592,8 +585,8 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
         st.markdown(
             f"""
             <div class="broadcast-panel" style="margin-top: 0;">
-                <h3 style="color: #f87171; margin-top: 0; font-size: 1.2rem;">📊 METEOROLOGICAL DESK</h3>
-                <p style="color: #d4d4d8; font-size: 0.9rem; line-height: 1.5; margin-bottom: 15px;">
+                <h3 style="color: #dc2626; margin-top: 0; font-size: 1.2rem; font-weight: 800;">📊 METEOROLOGICAL DESK</h3>
+                <p style="color: #334155; font-size: 0.95rem; font-weight: 500; line-height: 1.6; margin-bottom: 15px;">
                     {current['detailedForecast']}
                 </p>
             </div>
@@ -668,7 +661,7 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
             st.session_state.selected_forecast_day = daily_forecasts[0]["day"]
 
         st.markdown(
-            "<h4 style='color: #fafafa; font-size: 1rem; margin-bottom: 8px;'>📅"
+            "<h4 style='color: #0f172a; font-size: 1rem; font-weight: 800; margin-bottom: 8px;'>📅"
             " 7-Day Regional Outlook</h4>",
             unsafe_allow_html=True,
         )
@@ -711,16 +704,16 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
 
         st.markdown(
             f"""
-            <div style="background: rgba(18, 19, 26, 0.95); border: 1px solid #27272a; border-left: 3px solid #ef4444; border-radius: 8px; padding: 14px; margin-top: 12px;">
-                <div style="font-weight: 700; color: #f87171; font-size: 0.95rem; margin-bottom: 6px;">
+            <div style="background: #ffffff; border: 1px solid #cbd5e1; border-left: 4px solid #dc2626; border-radius: 8px; padding: 14px; margin-top: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
+                <div style="font-weight: 800; color: #dc2626; font-size: 0.95rem; margin-bottom: 6px;">
                     📋 REPORT • {selected_record['day']}
                 </div>
-                {f'<div style="font-size: 0.85rem; color: #f4f4f5; margin-bottom: 6px;"><strong>Day:</strong> {selected_record["detailed"]}</div>' if selected_record['detailed'] else ''}
-                {f'<div style="font-size: 0.85rem; color: #d4d4d8; margin-bottom: 8px;"><strong>Night:</strong> {selected_record["low_detailed"]}</div>' if selected_record['low_detailed'] else ''}
-                <div style="display: flex; gap: 15px; font-size: 0.8rem; color: #a1a1aa; border-top: 1px solid #27272a; padding-top: 6px;">
-                    <div>High: <strong style="color: #fafafa;">{selected_record['high']}</strong></div>
-                    <div>Low: <strong style="color: #fafafa;">{selected_record['low']}</strong></div>
-                    <div>Wind: <strong style="color: #fafafa;">{selected_record['wind_speed']}</strong></div>
+                {f'<div style="font-size: 0.9rem; color: #1e293b; font-weight: 500; margin-bottom: 6px;"><strong>Day:</strong> {selected_record["detailed"]}</div>' if selected_record['detailed'] else ''}
+                {f'<div style="font-size: 0.9rem; color: #334155; font-weight: 500; margin-bottom: 8px;"><strong>Night:</strong> {selected_record["low_detailed"]}</div>' if selected_record['low_detailed'] else ''}
+                <div style="display: flex; gap: 15px; font-size: 0.85rem; color: #475569; border-top: 1px solid #e2e8f0; padding-top: 8px;">
+                    <div>High: <strong style="color: #0f172a;">{selected_record['high']}</strong></div>
+                    <div>Low: <strong style="color: #0f172a;">{selected_record['low']}</strong></div>
+                    <div>Wind: <strong style="color: #0f172a;">{selected_record['wind_speed']}</strong></div>
                 </div>
             </div>
             """,
@@ -733,14 +726,14 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
         st.markdown("<div style='margin-top: 35px;'></div>", unsafe_allow_html=True)
         st.markdown(
             """
-            <div style="background: rgba(18, 19, 26, 0.98); border: 1px solid #27272a; border-top: 4px solid #ef4444; border-radius: 14px; padding: 24px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7); margin-bottom: 25px;">
+            <div style="background: #ffffff; border: 1px solid #cbd5e1; border-top: 4px solid #dc2626; border-radius: 14px; padding: 24px; box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08); margin-bottom: 25px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                    <h2 style="color: #f87171; margin: 0; font-size: 1.4rem; display: flex; align-items: center; gap: 10px;">
+                    <h2 style="color: #0f172a; margin: 0; font-size: 1.4rem; font-weight: 800; display: flex; align-items: center; gap: 10px;">
                         📢 TRI-STATE COMMUNITY ANNOUNCEMENTS DESK
                     </h2>
-                    <span style="background: rgba(239, 68, 68, 0.15); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); padding: 3px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">PUBLIC BULLETIN BOARD</span>
+                    <span style="background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; padding: 3px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">PUBLIC BULLETIN BOARD</span>
                 </div>
-                <p style="color: #d4d4d8; font-size: 0.95rem; margin-bottom: 20px; line-height: 1.5;">
+                <p style="color: #334155; font-size: 0.95rem; font-weight: 500; margin-bottom: 20px; line-height: 1.6;">
                     Your direct broadcast channel for regional public notices, community gatherings, missing item alerts, and local organization updates across the tri-state area.
                 </p>
             """,
@@ -750,18 +743,17 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
         if len(st.session_state.community_announcements) == 0:
             st.info("No active community announcements on the board.")
         else:
-            # Display announcements stacked in full-width containers with enlarged text and spacing
             for idx, ann in enumerate(st.session_state.community_announcements):
                 st.markdown(
                     f"""
-                    <div style="background: #0f1015; border: 1px solid #27272a; border-left: 5px solid #ef4444; border-radius: 12px; padding: 22px; margin-bottom: 20px; box-shadow: 0 6px 18px rgba(0,0,0,0.5);">
+                    <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-left: 6px solid #dc2626; border-radius: 12px; padding: 22px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.04);">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                            <strong style="color: #fafafa; font-size: 1.25rem; font-weight: 800; letter-spacing: -0.01em;">{ann['title']}</strong>
-                            <span style="color: #a1a1aa; font-size: 0.85rem; background: rgba(255,255,255,0.06); padding: 3px 10px; border-radius: 6px; font-weight: 600;">{ann['time']}</span>
+                            <strong style="color: #0f172a; font-size: 1.25rem; font-weight: 800; letter-spacing: -0.01em;">{ann['title']}</strong>
+                            <span style="color: #475569; font-size: 0.85rem; background: #e2e8f0; padding: 4px 10px; border-radius: 6px; font-weight: 700;">{ann['time']}</span>
                         </div>
-                        <p style="color: #f4f4f5; font-size: 1.1rem; margin: 0 0 16px 0; line-height: 1.6;">{ann['text']}</p>
-                        <div style="color: #d4d4d8; font-size: 0.9rem; font-style: italic; border-top: 1px solid #27272a; padding-top: 10px; display: flex; align-items: center; gap: 6px;">
-                            <span>Submitted by:</span> <strong style="color: #fca5a5; font-weight: 700;">{ann['author']}</strong>
+                        <p style="color: #1e293b; font-size: 1.05rem; font-weight: 500; margin: 0 0 16px 0; line-height: 1.6;">{ann['text']}</p>
+                        <div style="color: #475569; font-size: 0.9rem; font-style: italic; border-top: 1px solid #cbd5e1; padding-top: 12px; display: flex; align-items: center; gap: 6px;">
+                            <span>Submitted by:</span> <strong style="color: #dc2626; font-weight: 700; font-style: normal;">{ann['author']}</strong>
                         </div>
                     </div>
                     """,
@@ -773,8 +765,8 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
         # --- FIXED SUBMISSION FORM ---
         st.markdown(
             """
-            <div style="background: #12131c; border: 1px solid #27272a; border-top: 3px solid #ef4444; border-radius: 12px; padding: 20px; margin-bottom: 25px; box-shadow: 0 6px 20px rgba(0,0,0,0.5);">
-                <h3 style="color: #f87171; margin-top: 0; font-size: 1.2rem; margin-bottom: 15px;">➕ Broadcast New Community Announcement</h3>
+            <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-top: 3px solid #dc2626; border-radius: 12px; padding: 20px; margin-bottom: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.04);">
+                <h3 style="color: #0f172a; margin-top: 0; font-size: 1.2rem; font-weight: 800; margin-bottom: 15px;">➕ Broadcast New Community Announcement</h3>
             """,
             unsafe_allow_html=True,
         )
@@ -866,10 +858,10 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
                         else:
                             st.error("Invalid admin code.")
             else:
-                st.markdown("<div style='color: #34d399; font-weight: 700; margin-bottom: 10px;'>🟢 Admin Session Active</div>", unsafe_allow_html=True)
+                st.markdown("<div style='color: #16a34a; font-weight: 800; margin-bottom: 10px;'>🟢 Admin Session Active</div>", unsafe_allow_html=True)
                 
                 # --- UPDATE BREAKING NEWS BANNER FORM ---
-                st.markdown("<h4 style='color: #f87171; font-size: 1.05rem; margin-top: 15px;'>🚨 Update Breaking News Banner</h4>", unsafe_allow_html=True)
+                st.markdown("<h4 style='color: #dc2626; font-size: 1.05rem; font-weight: 800; margin-top: 15px;'>🚨 Update Breaking News Banner</h4>", unsafe_allow_html=True)
                 with st.form("admin_breaking_news_form"):
                     new_bn_title = st.text_input("Breaking News Headline", value=st.session_state.breaking_news_title)
                     new_bn_link = st.text_input("Story Reference URL / Link", value=st.session_state.breaking_news_link)
@@ -885,10 +877,10 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
                             time.sleep(0.3)
                             st.rerun()
 
-                st.markdown("<hr style='border: 1px solid #27272a; margin: 20px 0;'>", unsafe_allow_html=True)
+                st.markdown("<hr style='border: 1px solid #cbd5e1; margin: 20px 0;'>", unsafe_allow_html=True)
                 
                 # --- REMOVE COMMUNITY ANNOUNCEMENTS FORM ---
-                st.markdown("<h4 style='color: #f87171; font-size: 1.05rem;'>🗑️ Remove Community Announcements</h4>", unsafe_allow_html=True)
+                st.markdown("<h4 style='color: #dc2626; font-size: 1.05rem; font-weight: 800;'>🗑️ Remove Community Announcements</h4>", unsafe_allow_html=True)
                 with st.form("admin_management_form"):
                     st.write("Select the unwanted announcements you wish to permanently remove from the board:")
                     
@@ -932,11 +924,11 @@ st.markdown("<div style='margin-top: 35px;'></div>", unsafe_allow_html=True)
 
 st.markdown(
     """
-    <div style="background: rgba(18, 19, 26, 0.95); border: 1px solid #27272a; border-top: 4px solid #ef4444; border-radius: 12px; padding: 24px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7); margin-bottom: 25px;">
-        <h2 style="color: #f87171; margin-top: 0; font-size: 1.5rem; display: flex; align-items: center; gap: 10px;">
+    <div style="background: #ffffff; border: 1px solid #cbd5e1; border-top: 4px solid #dc2626; border-radius: 12px; padding: 24px; box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08); margin-bottom: 25px;">
+        <h2 style="color: #0f172a; margin-top: 0; font-size: 1.5rem; font-weight: 800; display: flex; align-items: center; gap: 10px;">
             📰 TRI-STATE NEWS LIVE FACEBOOK FEED
         </h2>
-        <p style="color: #d4d4d8; font-size: 1rem; margin-bottom: 20px;">
+        <p style="color: #334155; font-size: 1rem; font-weight: 500; margin-bottom: 20px;">
             Browse full-size broadcast updates, real-time alerts, and community posts streamed directly from our official Facebook page.
         </p>
     </div>
@@ -945,7 +937,7 @@ st.markdown(
 )
 
 fb_feed_html = """
-<div style="background: #12131a; padding: 15px; border-radius: 12px; border: 1px solid #27272a; text-align: center; width: 100%; max-width: 100%; box-sizing: border-box; overflow: hidden;">
+<div style="background: #ffffff; padding: 15px; border-radius: 12px; border: 1px solid #cbd5e1; text-align: center; width: 100%; max-width: 100%; box-sizing: border-box; overflow: hidden;">
     <div id="fb-root"></div>
     <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v18.0"></script>
     <div class="fb-page" 
@@ -973,10 +965,10 @@ st.markdown("<div style='margin: 35px 0 10px 0;'></div>", unsafe_allow_html=True
 
 st.markdown(
     """
-<div style="background: rgba(18, 19, 26, 0.95); border: 1px solid #27272a; border-top: 3px solid #ef4444; border-radius: 12px; padding: 20px; font-family: system-ui, -apple-system, sans-serif; color: #f4f4f5; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);">
-    <h3 style="color: #f87171; margin-top: 0; font-size: 1.2rem;">💬 TSN VIEWER & COMMUNITY FEEDBACK DESK</h3>
-    <p style="color: #a1a1aa; font-size: 0.9rem; margin-bottom: 15px;">
-        Have news tips, weather updates, or suggestions for the network? Send your message directly to the TSN desk at <strong style="color: #fafafa;">wsnk836@gmail.com</strong>.
+<div style="background: #ffffff; border: 1px solid #cbd5e1; border-top: 3px solid #dc2626; border-radius: 12px; padding: 20px; font-family: system-ui, -apple-system, sans-serif; color: #0f172a; box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);">
+    <h3 style="color: #0f172a; margin-top: 0; font-size: 1.2rem; font-weight: 800;">💬 TSN VIEWER & COMMUNITY FEEDBACK DESK</h3>
+    <p style="color: #334155; font-size: 0.95rem; font-weight: 500; margin-bottom: 15px;">
+        Have news tips, weather updates, or suggestions for the network? Send your message directly to the TSN desk at <strong style="color: #dc2626;">wsnk836@gmail.com</strong>.
     </p>
 </div>
 """,
@@ -1025,7 +1017,7 @@ with st.form("tsn_feedback_form"):
                             "Accept": "application/json"
                         }},
                         body: JSON.stringify(payload)
-                    }});
+                    }};
                     let data = await response.json();
                     if (data.success) {{
                         console.log("Feedback sent successfully");
@@ -1047,8 +1039,8 @@ with st.form("tsn_feedback_form"):
 # --- NETWORK FOOTER ---
 st.markdown(
     """
-<div style="text-align: center; color: #71717a; font-size: 0.82rem; margin-top: 40px; padding-bottom: 20px;">
-    <hr style="border: none; border-top: 1px solid #27272a; margin-bottom: 15px;">
+<div style="text-align: center; color: #64748b; font-size: 0.85rem; font-weight: 600; margin-top: 40px; padding-bottom: 20px;">
+    <hr style="border: none; border-top: 1px solid #cbd5e1; margin-bottom: 15px;">
     <strong>TRI-STATE NEWS</strong> • Tri-State Broadcast Operations & Meteorological Telemetry<br>
     Powered by NWS Meteorological Data Servers
 </div>
