@@ -136,7 +136,7 @@ st.markdown(
         100% { opacity: 1; }
     }
     .breaking-news-banner {
-        background: linear-gradient(135deg, rgba(185, 28, 28, 0.25) 0%, rgba(24, 25, 32, 0.95) 100%);
+        background: linear-gradient(135deg, rgba(185, 28, 28, 0.25) 0%, rgba(18, 19, 26, 0.95) 100%);
         border: 1px solid rgba(239, 68, 68, 0.5);
         border-left: 6px solid #ef4444;
         border-radius: 10px;
