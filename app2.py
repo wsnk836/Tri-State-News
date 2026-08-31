@@ -587,7 +587,7 @@ render_tsn_broadcast_center(ACTIVE_LAT, ACTIVE_LON, location_name)
 # ==========================================
 st.markdown("<div style='margin: 30px 0 10px 0;'></div>", unsafe_allow_html=True)
 
-feedback_component_code = """
+feedback_component_code = r"""
 <div style="background: rgba(18, 19, 26, 0.95); border: 1px solid #27272a; border-top: 3px solid #ef4444; border-radius: 12px; padding: 20px; font-family: system-ui, -apple-system, sans-serif; color: #f4f4f5; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);">
     <h3 style="color: #f87171; margin-top: 0; font-size: 1.2rem;">💬 TSN VIEWER & COMMUNITY FEEDBACK DESK</h3>
     <p style="color: #a1a1aa; font-size: 0.9rem; margin-bottom: 15px;">
@@ -602,4 +602,79 @@ feedback_component_code = """
         <input type="text" id="fb_loc" placeholder="City or ZIP" style="width: 100%; padding: 10px; background: #08090c; border: 1px solid #27272a; border-radius: 6px; color: #f4f4f5; font-size: 0.9rem; box-sizing: border-box;">
     </div>
     <div style="margin-bottom: 15px;">
-        <label style="display: block; font-size: 0.85rem; color: #a1a1
+        <label style="display: block; font-size: 0.85rem; color: #a1a1aa; margin-bottom: 4px; font-weight: 600; text-transform: uppercase;">Feedback or News Tip *</label>
+        <textarea id="fb_msg" rows="4" placeholder="Enter your message, news tip, or suggestion here..." style="width: 100%; padding: 10px; background: #08090c; border: 1px solid #27272a; border-radius: 6px; color: #f4f4f5; font-size: 0.9rem; box-sizing: border-box; resize: vertical;"></textarea>
+    </div>
+    <button onclick="submitFeedback()" id="submit-btn" style="width: 100%; background: #ef4444; color: white; border: none; padding: 12px; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.05em;">Transmit Feedback to Desk</button>
+    <div id="form-result" style="margin-top: 12px; font-size: 0.9rem; text-align: center; font-weight: 600;"></div>
+</div>
+
+<script>
+async function submitFeedback() {
+    const name = document.getElementById('fb_name').value.trim();
+    const location = document.getElementById('fb_loc').value.trim();
+    const message = document.getElementById('fb_msg').value.trim();
+    const resultDiv = document.getElementById('form-result');
+    const submitBtn = document.getElementById('submit-btn');
+
+    if (!name || !message) {
+        resultDiv.style.color = '#ef4444';
+        resultDiv.innerText = '⚠️ Transmission error: Please provide both your name and message.';
+        return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.innerText = 'TRANSMITTING...';
+    resultDiv.innerText = '';
+
+    try {
+        const response = await fetch('https://api.web3forms.com/submit', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                access_key: '6f59571f-f519-4655-9b50-095eed178152',
+                subject: '💡 Community Feedback and Suggestions from TSN News Network',
+                name: name,
+                location: location,
+                message: message
+            })
+        });
+
+        const data = await response.json();
+        if (response.status === 200 && data.success) {
+            resultDiv.style.color = '#10b981';
+            resultDiv.innerText = '✅ Feedback successfully transmitted directly to wsnk836@gmail.com!';
+            document.getElementById('fb_name').value = '';
+            document.getElementById('fb_loc').value = '';
+            document.getElementById('fb_msg').value = '';
+        } else {
+            resultDiv.style.color = '#ef4444';
+            resultDiv.innerText = '❌ Server relay error: ' + (data.message || 'Please try again shortly.');
+        }
+    } catch (error) {
+        resultDiv.style.color = '#ef4444';
+        resultDiv.innerText = '❌ Network connection error. Please check your connection.';
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerText = 'Transmit Feedback to Desk';
+    }
+}
+</script>
+"""
+
+components.html(feedback_component_code, height=430)
+
+# --- NETWORK FOOTER ---
+st.markdown(
+    """
+<div style="text-align: center; color: #71717a; font-size: 0.82rem; margin-top: 40px; padding-bottom: 20px;">
+    <hr style="border: none; border-top: 1px solid #27272a; margin-bottom: 15px;">
+    <strong>TSN NEWS NETWORK</strong> • Tri-State Broadcast Operations & Meteorological Telemetry<br>
+    Powered by NWS Meteorological Data Servers
+</div>
+""",
+    unsafe_allow_html=True,
+)
