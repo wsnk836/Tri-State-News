@@ -215,6 +215,11 @@ st.markdown(
         color: #ffffff !important;
         border-color: #ef4444 !important;
     }
+    /* Force Streamlit columns to stay horizontal and prevent stacking on desktop */
+    [data-testid="column"] {
+        flex: 1 !important;
+        min-width: 0 !important;
+    }
 </style>
 """,
     unsafe_allow_html=True,
@@ -571,7 +576,7 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
 
     with tab3:
       days_3 = daily_forecasts[:3]
-      cols3 = st.columns(len(days_3))
+      cols3 = st.columns(len(days_3), gap="small")
       for idx, d_item in enumerate(days_3):
         with cols3[idx]:
           is_selected = d_item["day"] == st.session_state.selected_forecast_day
@@ -584,7 +589,7 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
 
     with tab7:
       days_7 = daily_forecasts[:7]
-      cols7 = st.columns(len(days_7))
+      cols7 = st.columns(len(days_7), gap="small")
       for idx, d_item in enumerate(days_7):
         with cols7[idx]:
           is_selected = d_item["day"] == st.session_state.selected_forecast_day
