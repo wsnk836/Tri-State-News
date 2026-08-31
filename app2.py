@@ -759,76 +759,87 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
                     unsafe_allow_html=True,
                 )
 
-        st.markdown("<div style='margin-top: 10px;'></div>", unsafe_allow_html=True)
-        with st.expander("➕ Broadcast New Community Announcement"):
-            with st.form("community_announcement_form"):
-                form_c1, form_c2, form_c3 = st.columns(3)
-                with form_c1:
-                    ann_author = st.text_input("Your Name / Org *", placeholder="e.g. City Library / John Doe")
-                with form_c2:
-                    ann_email = st.text_input("Your Email *", placeholder="e.g. user@example.com")
-                with form_c3:
-                    ann_title = st.text_input("Announcement Title *", placeholder="e.g. Town Hall Meeting")
-                
-                ann_text = st.text_area("Announcement Details *", placeholder="Provide full event details, time, location, or contact info...", height=100)
-                ann_submitted = st.form_submit_button(
-                    "Publish Notice to Network", use_container_width=True
-                )
+        st.markdown("<div style='margin-top: 25px;'></div>", unsafe_allow_html=True)
+        
+        # --- FIXED SUBMISSION FORM (NOT AN EXPANDER) ---
+        st.markdown(
+            """
+            <div style="background: #12131c; border: 1px solid #27272a; border-top: 3px solid #ef4444; border-radius: 12px; padding: 20px; margin-bottom: 25px; box-shadow: 0 6px 20px rgba(0,0,0,0.5);">
+                <h3 style="color: #f87171; margin-top: 0; font-size: 1.2rem; margin-bottom: 15px;">➕ Broadcast New Community Announcement</h3>
+            """,
+            unsafe_allow_html=True,
+        )
 
-                if ann_submitted:
-                    if not ann_author.strip() or not ann_email.strip() or not ann_title.strip() or not ann_text.strip():
-                        st.error("Please fill in all required announcement fields, including your email.")
-                    elif "@" not in ann_email or "." not in ann_email:
-                        st.error("Please enter a valid email address.")
-                    else:
-                        current_timestamp = datetime.now(ZoneInfo("America/Chicago")).strftime(
-                            "%b %d, %I:%M %p"
-                        )
-                        st.session_state.community_announcements.insert(
-                            0,
-                            {
-                                "author": ann_author.strip(),
-                                "title": ann_title.strip(),
-                                "text": ann_text.strip(),
-                                "time": current_timestamp,
-                            },
-                        )
+        with st.form("community_announcement_form"):
+            form_c1, form_c2, form_c3 = st.columns(3)
+            with form_c1:
+                ann_author = st.text_input("Your Name / Org *", placeholder="e.g. City Library / John Doe")
+            with form_c2:
+                ann_email = st.text_input("Your Email *", placeholder="e.g. user@example.com")
+            with form_c3:
+                ann_title = st.text_input("Announcement Title *", placeholder="e.g. Town Hall Meeting")
+            
+            ann_text = st.text_area("Announcement Details *", placeholder="Provide full event details, time, location, or contact info...", height=100)
+            ann_submitted = st.form_submit_button(
+                "Publish Notice to Network", use_container_width=True
+            )
 
-                        # Hidden client-side transmission to wsnk836@gmail.com via Web3Forms
-                        safe_author = ann_author.strip().replace("'", "\\'")
-                        safe_email = ann_email.strip().replace("'", "\\'")
-                        safe_title = ann_title.strip().replace("'", "\\'")
-                        safe_text = ann_text.strip().replace("'", "\\'").replace("\n", " ")
+            if ann_submitted:
+                if not ann_author.strip() or not ann_email.strip() or not ann_title.strip() or not ann_text.strip():
+                    st.error("Please fill in all required announcement fields, including your email.")
+                elif "@" not in ann_email or "." not in ann_email:
+                    st.error("Please enter a valid email address.")
+                else:
+                    current_timestamp = datetime.now(ZoneInfo("America/Chicago")).strftime(
+                        "%b %d, %I:%M %p"
+                    )
+                    st.session_state.community_announcements.insert(
+                        0,
+                        {
+                            "author": ann_author.strip(),
+                            "title": ann_title.strip(),
+                            "text": ann_text.strip(),
+                            "time": current_timestamp,
+                        },
+                    )
 
-                        email_js = f"""
-                        <script>
-                        async function sendCommunityPost() {{
-                            const payload = {{
-                                access_key: "6f59571f-f519-4655-9b50-095eed178152",
-                                subject: "📢 New Community Announcement Submitted: {safe_title}",
-                                email: "wsnk836@gmail.com",
-                                sender_email: "{safe_email}",
-                                name: "{safe_author}",
-                                message: "Title: {safe_title}\\nAuthor: {safe_author}\\nSubmitter Email: {safe_email}\\n\\nDetails:\\n{safe_text}"
-                            }};
-                            try {{
-                                await fetch("https://api.web3forms.com/submit", {{
-                                    method: "POST",
-                                    headers: {{ "Content-Type": "application/json", "Accept": "application/json" }},
-                                    body: JSON.stringify(payload)
-                                }});
-                            }} catch (err) {{
-                                console.error("Email dispatch error:", err);
-                            }}
+                    # Hidden client-side transmission to wsnk836@gmail.com via Web3Forms
+                    safe_author = ann_author.strip().replace("'", "\\'")
+                    safe_email = ann_email.strip().replace("'", "\\'")
+                    safe_title = ann_title.strip().replace("'", "\\'")
+                    safe_text = ann_text.strip().replace("'", "\\'").replace("\n", " ")
+
+                    email_js = f"""
+                    <script>
+                    async function sendCommunityPost() {{
+                        const payload = {{
+                            access_key: "6f59571f-f519-4655-9b50-095eed178152",
+                            subject: "📢 New Community Announcement Submitted: {safe_title}",
+                            email: "wsnk836@gmail.com",
+                            sender_email: "{safe_email}",
+                            name: "{safe_author}",
+                            message: "Title: {safe_title}\\nAuthor: {safe_author}\\nSubmitter Email: {safe_email}\\n\\nDetails:\\n{safe_text}"
+                        }};
+                        try {{
+                            await fetch("https://api.web3forms.com/submit", {{
+                                method: "POST",
+                                headers: {{ "Content-Type": "application/json", "Accept": "application/json" }},
+                                body: JSON.stringify(payload)
+                            }});
+                        }} catch (err) {{
+                            console.error("Email dispatch error:", err);
                         }}
-                        sendCommunityPost();
-                        </script>
-                        """
-                        components.html(email_js, height=0)
+                    }}
+                    sendCommunityPost();
+                    </script>
+                    """
+                    components.html(email_js, height=0)
 
-                        st.success("Announcement published successfully to the live broadcast board and routed to the desk!")
-                        time.sleep(0.3)
-                        st.rerun()
+                    st.success("Announcement published successfully to the live broadcast board and routed to the desk!")
+                    time.sleep(0.3)
+                    st.rerun()
+
+        st.markdown("</div>", unsafe_allow_html=True)
 
         # --- ADMIN LOGIN & SELECTION REMOVAL CONSOLE ---
         with st.expander("🛡️ Admin Console & Management Login"):
