@@ -54,17 +54,22 @@ localStorage_sync_code = """
 """
 components.html(localStorage_sync_code, height=0)
 
-# --- TACTICAL CRIMSON & CARBON CSS ---
+# --- TACTICAL CRIMSON & CARBON CSS WITH BACKGROUND & LOGO SUPPORT ---
 st.markdown(
     """
 <style>
     .stApp {
-        background-color: #0c0d10;
+        /* Background image with a dark overlay to preserve text legibility */
+        background: linear-gradient(rgba(12, 13, 16, 0.90), rgba(12, 13, 16, 0.90)), 
+                    url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1920&auto=format&fit=crop');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
         color: #f4f4f5;
         font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
     .hero-banner {
-        background: linear-gradient(145deg, #18191f 0%, #0e0f12 100%);
+        background: linear-gradient(145deg, rgba(24, 25, 31, 0.95) 0%, rgba(14, 15, 18, 0.95) 100%);
         border: 1px solid #27272a;
         border-top: 3px solid #ef4444;
         border-radius: 14px;
@@ -79,8 +84,14 @@ st.markdown(
         margin: 0;
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 14px;
         letter-spacing: -0.02em;
+    }
+    .hero-logo {
+        height: 42px;
+        width: 42px;
+        object-fit: contain;
+        border-radius: 6px;
     }
     .hero-subtitle {
         color: #a1a1aa;
@@ -91,7 +102,8 @@ st.markdown(
         font-weight: 500;
     }
     .command-card {
-        background: #121316;
+        background: rgba(18, 19, 22, 0.88);
+        backdrop-filter: blur(8px);
         border: 1px solid #27272a;
         border-radius: 12px;
         padding: 16px 20px;
@@ -102,14 +114,15 @@ st.markdown(
     }
     .welcome-card { border-left: 4px solid #ef4444; }
     .news-card {
-        background: rgba(239, 68, 68, 0.05);
+        background: rgba(239, 68, 68, 0.08);
         border: 1px solid rgba(239, 68, 68, 0.2);
         border-left: 4px solid #f87171;
         color: #fee2e2;
     }
     .install-card { border-left: 4px solid #38bdf8; color: #d4d4d8; font-size: 0.9rem; }
     .alert-card-severe {
-        background: rgba(239, 68, 68, 0.12);
+        background: rgba(239, 68, 68, 0.15);
+        backdrop-filter: blur(6px);
         border: 1px solid rgba(239, 68, 68, 0.3);
         border-left: 4px solid #ef4444;
         border-radius: 10px;
@@ -117,7 +130,8 @@ st.markdown(
         margin-bottom: 12px;
     }
     .alert-card-clear {
-        background: rgba(16, 185, 129, 0.08);
+        background: rgba(16, 185, 129, 0.1);
+        backdrop-filter: blur(6px);
         border: 1px solid rgba(16, 185, 129, 0.25);
         border-left: 4px solid #10b981;
         border-radius: 10px;
@@ -126,7 +140,8 @@ st.markdown(
         color: #d1fae5;
     }
     [data-testid="stMetric"] {
-        background: #121316;
+        background: rgba(18, 19, 22, 0.88) !important;
+        backdrop-filter: blur(8px);
         border: 1px solid #27272a;
         border-radius: 12px;
         padding: 14px 18px;
@@ -147,7 +162,7 @@ st.markdown(
     .stTabs [data-baseweb="tab"] {
         border-radius: 8px;
         padding: 4px 12px;
-        background-color: #121316;
+        background-color: rgba(18, 19, 22, 0.88);
         border: 1px solid #27272a;
         color: #a1a1aa;
         font-weight: 600;
@@ -185,11 +200,19 @@ except ValueError:
   ACTIVE_LON = float(default_lon)
   location_name = "Marcus, IA"
 
-# --- HERO HEADER ---
+# --- HERO HEADER WITH COMPANY LOGO ---
+# Replace the src URL below with your company logo URL or local path if hosted
+company_logo_url = (
+    "https://api.iconify.design/lucide:radio-tower.svg?color=%23f87171"
+)
+
 st.markdown(
-    """
+    f"""
 <div class="hero-banner">
-    <div class="hero-title">📡 Tri State News</div>
+    <div class="hero-title">
+        <img src="{company_logo_url}" class="hero-logo" alt="Logo"/>
+        Tri State News
+    </div>
     <div class="hero-subtitle">Real-time NWS Telemetry & Regional Operations</div>
 </div>
 """,
@@ -360,7 +383,7 @@ def load_live_weather(lat, lon, loc_label):
 
       st.markdown(
           f"""
-            <div style="background: #121316; border: 1px solid #27272a; border-radius: 10px; padding: 10px 14px; margin: 10px 0 15px 0; color: #d4d4d8; font-size: 0.88rem;">
+            <div style="background: rgba(18, 19, 22, 0.88); backdrop-filter: blur(8px); border: 1px solid #27272a; border-radius: 10px; padding: 10px 14px; margin: 10px 0 15px 0; color: #d4d4d8; font-size: 0.88rem;">
                 <strong>📋 Summary:</strong> {current['detailedForecast']}
             </div>
             """,
@@ -483,7 +506,7 @@ def load_live_weather(lat, lon, loc_label):
 
       st.markdown(
           f"""
-            <div style="background: #18191f; border: 1px solid #27272a; border-left: 3px solid #ef4444; border-radius: 10px; padding: 18px 20px; margin-top: 15px;">
+            <div style="background: rgba(24, 25, 31, 0.9); backdrop-filter: blur(8px); border: 1px solid #27272a; border-left: 3px solid #ef4444; border-radius: 10px; padding: 18px 20px; margin-top: 15px;">
                 <div style="font-weight: 700; color: #f87171; font-size: 1.05rem; margin-bottom: 10px;">
                     🏛️ Full NWS Forecast Report • {selected_record['day']}
                 </div>
