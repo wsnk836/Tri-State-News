@@ -361,7 +361,6 @@ Want quick one-tap access to Tri-State News like a native mobile app? Follow the
 1. Open this app in **Google Chrome**, **Microsoft Edge**, or **Brave**.
 2. Look for the **install icon** (a small monitor with a down arrow or a plus sign) located on the right side of your browser address/URL bar.
 3. Click **Install**. 
-4. *(Note: On desktop, you can usually right-click the installed app shortcut on your desktop or applications folder later to rename it to whatever you prefer).*
         """
     )
 
@@ -779,7 +778,7 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
                 )
 
         # ==========================================
-        # --- DIRECT DESK FEEDBACK & SUBMISSION FORM (OPEN) ---
+        # --- DIRECT DESK FEEDBACK & SUBMISSION FORM ---
         # ==========================================
         st.markdown("<div style='margin-top: 25px;'></div>", unsafe_allow_html=True)
         st.markdown(
@@ -789,7 +788,7 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
                     ✉️ Send Community Announcement or Feedback to TSN Desk
                 </h3>
                 <p style="color: #334155; font-size: 0.9rem; margin-bottom: 15px;">
-                    Have a local news tip, a community announcement, or app feedback? Fill out the form below to instantly open your email client pre-addressed to <strong>wsnk836@gmail.com</strong> and <strong>news@tsnnet.org</strong>.
+                    Have a local news tip, a community announcement, or app feedback? Fill out the form below to send it directly to <strong>wsnk836@gmail.com</strong>.
                 </p>
             """,
             unsafe_allow_html=True
@@ -801,17 +800,17 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
             fb_title = st.text_input("Headline / Subject", placeholder="e.g. Annual Community Food Drive at City Park")
             fb_message = st.text_area("Message Details", placeholder="Provide all relevant details, times, locations, or feedback notes here...")
             
-            submitted = st.form_submit_button("Open Email Client to Send")
+            submitted = st.form_submit_button("Send to TSN Desk")
             
             if submitted:
                 if not fb_name.strip() or not fb_title.strip() or not fb_message.strip():
                     st.error("Please fill out all required fields before sending.")
                 else:
-                    recipients = "wsnk836@gmail.com,news@tsnnet.org"
+                    recipient = "wsnk836@gmail.com"
                     subject = urllib.parse.quote(f"[{fb_type}] {fb_title}")
                     body = urllib.parse.quote(f"Name/Org: {fb_name}\nType: {fb_type}\n\nDetails:\n{fb_message}")
                     
-                    mailto_url = f"mailto:{recipients}?subject={subject}&body={body}"
+                    mailto_url = f"mailto:{recipient}?subject={subject}&body={body}"
                     
                     email_trigger_html = f"""
                     <script>
@@ -820,8 +819,7 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
                     """
                     components.html(email_trigger_html, height=0)
                     
-                    st.success("Preparing your email client! If your device didn't open it automatically, click the secure link below:")
-                    st.markdown(f'<a href="{mailto_url}" target="_blank" style="background-color: #dc2626; color: white; padding: 10px 16px; border-radius: 6px; text-decoration: none; font-weight: 800; display: inline-block; margin-top: 10px;">✉️ Click Here to Launch Email Client</a>', unsafe_allow_html=True)
+                    st.success("Submission prepared! Your email client has been opened to send this directly to wsnk836@gmail.com.")
                     
                     # If it's a community announcement, also push it to the live board state
                     if fb_type == "Community Announcement":
