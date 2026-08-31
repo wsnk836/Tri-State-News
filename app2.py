@@ -213,4 +213,8 @@ st.markdown(
         -webkit-text-fill-color: #64748b !important;
     }
     .stTabs [data-baseweb="tab-list"] { gap: 6px; background-color: transparent; }
-    .stTabs [data-basew
+    .stTabs [data-baseweb="tab"] { border-radius: 6px 6px 0px 0px; }
+</style>
+""",
+    unsafe_allow_html=True,
+)
