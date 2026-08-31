@@ -987,7 +987,6 @@ st.markdown(
 
 with st.form("tsn_feedback_form"):
     fb_name = st.text_input("Viewer Name *", placeholder="Your Name")
-    fb_loc = st.text_input("Your Location / Grid (Optional)", placeholder="City or ZIP")
     fb_msg = st.text_area(
         "Feedback or News Tip *",
         placeholder="Enter your message, news tip, or suggestion here...",
@@ -1003,9 +1002,7 @@ with st.form("tsn_feedback_form"):
             )
         else:
             safe_name = fb_name.strip().replace("'", "\\'")
-            safe_loc = (
-                fb_loc.strip().replace("'", "\\'") if fb_loc else "Not provided"
-            )
+            safe_loc = "Not provided"
             safe_msg = fb_msg.strip().replace("'", "\\'").replace("\n", " ")
 
             client_js = f"""
