@@ -40,7 +40,6 @@ geolocation_bridge_code = """
                     window.top.location.href = newUrl;
                 }
             } else {
-                # Default fallback on first-ever load without trying browser GPS override (Defaults to KSFD region: Sioux City, IA)
                 sessionStorage.setItem('tsn_synced', 'true');
                 const defLat = '42.4006';
                 const defLon = '-96.4001';
@@ -137,12 +136,33 @@ st.markdown(
         margin-bottom: 20px;
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
     }
-    .radar-container {
-        background: rgba(12, 13, 18, 0.98);
-        border: 2px solid #3f3f46;
-        border-radius: 14px;
-        padding: 12px;
-        box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.8), 0 10px 30px rgba(0, 0, 0, 0.7);
+    /* Modern, Sleek Neon Radar Window Frame */
+    .radar-wrapper {
+        background: linear-gradient(180deg, #12131c 0%, #090a0f 100%);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        border-radius: 16px;
+        padding: 18px;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7), 0 0 20px rgba(239, 68, 68, 0.08);
+        position: relative;
+        overflow: hidden;
+    }
+    .radar-screen-inner {
+        position: relative;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid #27272a;
+        background: #050508;
+    }
+    /* Scanline visual overlay effect */
+    .radar-screen-inner::after {
+        content: " ";
+        display: block;
+        position: absolute;
+        top: 0; left: 0; bottom: 0; right: 0;
+        background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+        z-index: 10;
+        background-size: 100% 4px, 6px 100%;
+        pointer-events: none;
     }
     .alert-severe {
         background: rgba(239, 68, 68, 0.18);
@@ -196,7 +216,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# --- QUERY PARAMS RESOLUTION (Default to KSFD / Sioux City, IA) ---
+# --- QUERY PARAMS RESOLUTION ---
 query_params = st.query_params
 default_lat = "42.4006"
 default_lon = "-96.4001"
@@ -420,23 +440,31 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
     st.error(f"Error establishing NWS data link: {e}")
     return
 
-  # --- LAYOUT: RADAR & OUTLOOK ---
+  # --- LAYOUT: MODERN RADAR & OUTLOOK ---
   col_radar, col_outlook = st.columns([1.5, 1], gap="large")
 
   with col_radar:
     st.markdown(
         f"""
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-            <h3 style="margin: 0; color: #f87171; font-size: 1.2rem;">📡 LIVE DOPPLER RADAR NETWORK ({radar_station})</h3>
-            <span style="font-size: 0.8rem; color: #a1a1aa;">HD STREAM • 60s REFRESH</span>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="width: 8px; height: 8px; background-color: #22c55e; border-radius: 50%; display: inline-block; box-shadow: 0 0 8px #22c55e;"></span>
+                <h3 style="margin: 0; color: #f4f4f5; font-size: 1.1rem; font-weight: 800; letter-spacing: -0.01em;">LIVE DOPPLER • <span style="color: #ef4444;">{radar_station}</span></h3>
+            </div>
+            <div style="display: flex; align-items: center; gap: 6px;">
+                <span style="background: rgba(239, 68, 68, 0.15); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); padding: 2px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 700;">HD VECTOR</span>
+                <span style="background: rgba(24, 25, 32, 0.9); color: #a1a1aa; border: 1px solid #27272a; padding: 2px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 700;">60S REFRESH</span>
+            </div>
         </div>
         """,
         unsafe_allow_html=True,
     )
     radar_url = f"https://radar.weather.gov/ridge/standard/{radar_station}_loop.gif?t={int(time.time())}"
-    st.markdown('<div class="radar-container">', unsafe_allow_html=True)
+    
+    # Render inside sleek modern container with scanlines
+    st.markdown('<div class="radar-wrapper"><div class="radar-screen-inner">', unsafe_allow_html=True)
     st.image(radar_url, use_container_width=True)
-    st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown('</div></div>', unsafe_allow_html=True)
 
     st.markdown("<div style='margin-top: 15px;'></div>", unsafe_allow_html=True)
     m1, m2, m3 = st.columns(3)
