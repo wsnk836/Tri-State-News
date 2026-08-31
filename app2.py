@@ -449,3 +449,379 @@ with st.expander(
                         st.query_params["lat"] = new_lat
                         st.query_params["lon"] = new_lon
                         st.query_params["loc_name"] = loc_label
+
+                        update_js = f"""
+                            <script>
+                                localStorage.setItem('tsn_lat', '{new_lat}');
+                                localStorage.setItem('tsn_lon', '{new_lon}');
+                                localStorage.setItem('tsn_loc_name', '{loc_label}');
+                                sessionStorage.setItem('tsn_synced', 'true');
+                                window.location.reload();
+                            </script>
+                            """
+                        components.html(update_js, height=0)
+                        st.success(f"Grid updated successfully to ZIP {zip_input}!")
+                        time.sleep(0.5)
+                        st.rerun()
+                    else:
+                        st.error("ZIP code not found in US database. Please verify.")
+                except Exception as e:
+                    st.error(f"Geocoding connection error: {e}")
+            else:
+                st.error("Please enter a valid 5-digit US ZIP code.")
+
+
+# ==========================================
+# --- LIVE FRAGMENT: RADAR & WEATHER OUTLOOK ---
+# ==========================================
+@st.fragment(run_every=60)
+def render_tsn_broadcast_center(lat, lon, loc_label):
+    headers = {
+        "User-Agent": "TSNNetworkApp (wsnk836@gmail.com)",
+        "Accept": "application/geo+json",
+    }
+
+    if "selected_forecast_day" not in st.session_state:
+        st.session_state.selected_forecast_day = None
+
+    if "community_announcements" not in st.session_state:
+        st.session_state.community_announcements = [
+            {
+                "author": "TSN Desk",
+                "title": "Welcome to Tri-State Announcements",
+                "text": (
+                    "Use the submission form below to broadcast local notices,"
+                    " community events, or missing item alerts."
+                ),
+                "time": datetime.now(ZoneInfo("America/Chicago")).strftime(
+                    "%b %d, %I:%M %p"
+                ),
+            },
+        ]
+        
+        
+
+    # --- ACTIVE WEATHER ALERTS ---
+    try:
+        alerts_url = f"https://api.weather.gov/alerts/active?point={lat},{lon}"
+        alerts_response = requests.get(alerts_url, headers=headers, timeout=10).json()
+        alerts = alerts_response.get("features", [])
+
+        if len(alerts) > 0:
+            for alert in alerts:
+                props = alert.get("properties", {})
+                event = props.get("event", "Weather Alert")
+                headline = props.get("headline", "Severe weather advisory issued.")
+                description = props.get("description", "No details provided.")
+                severity = props.get("severity", "Unknown")
+                status_color = (
+                    "#dc2626" if severity in ["Extreme", "Severe"] else "#ea580c"
+                )
+
+                st.markdown(
+                    f"""
+                    <div class="alert-severe" style="border-left-color: {status_color};">
+                        <strong style="color: {status_color}; font-size: 1rem;">🚨 TSN BULLETIN: {event}</strong><br/>
+                        <span style="color: #1e293b; font-size: 0.95rem; font-weight: 600; margin-top: 4px; display: block;">{headline}</span>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+                with st.expander("📄 View Full Emergency Statement"):
+                    st.write(description)
+        else:
+            st.markdown(
+                f"""
+                <div class="alert-clear">
+                    🟢 <strong style="color: #14532d;">TSN STATUS:</strong> All clear. No active severe warnings for {loc_label}.
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+    except Exception as e:
+        st.error(f"Alert telemetry feed unreachable: {e}")
+
+    # --- FETCH NWS POINTS & FORECAST ---
+    try:
+        points_url = f"https://api.weather.gov/points/{lat},{lon}"
+        points_res = requests.get(points_url, headers=headers, timeout=10)
+
+        if points_res.status_code != 200:
+            st.error(
+                "NWS Grid Server error. Coordinates may fall outside US jurisdiction."
+            )
+            return
+
+        points_data = points_res.json()
+        radar_station = points_data["properties"].get("radarStation", "KSFD")
+        forecast_url = points_data["properties"].get("forecast")
+
+        forecast_res = requests.get(forecast_url, headers=headers, timeout=10)
+        forecast_data = forecast_res.json()
+        periods = forecast_data["properties"]["periods"]
+        current = periods[0]
+
+    except Exception as e:
+        st.error(f"Error establishing NWS data link: {e}")
+        return
+
+    # --- LAYOUT: MODERN RADAR & OUTLOOK ---
+    col_radar, col_outlook = st.columns([1.5, 1], gap="large")
+
+    with col_radar:
+        st.markdown(
+            f"""
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="width: 10px; height: 10px; background-color: #16a34a; border-radius: 50%; display: inline-block; box-shadow: 0 0 8px #16a34a;"></span>
+                    <h3 style="margin: 0; color: #0f172a; font-size: 1.1rem; font-weight: 800; letter-spacing: -0.01em;">LIVE DOPPLER • <span style="color: #dc2626;">{radar_station}</span></h3>
+                </div>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span style="background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; padding: 2px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 700;">HD VECTOR</span>
+                    <span style="background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; padding: 2px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 700;">60S REFRESH</span>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        radar_url = f"https://radar.weather.gov/ridge/standard/{radar_station}_loop.gif?t={int(time.time())}"
+
+        st.markdown(
+            '<div class="radar-wrapper"><div class="radar-screen-inner">',
+            unsafe_allow_html=True,
+        )
+        st.image(radar_url, use_container_width=True)
+        st.markdown("</div></div>", unsafe_allow_html=True)
+
+        st.markdown("<div style='margin-top: 15px;'></div>", unsafe_allow_html=True)
+        m1, m2, m3 = st.columns(3)
+        with m1:
+            st.metric(
+                "🌡️ Temp", f"{current['temperature']}°{current['temperatureUnit']}"
+            )
+        with m2:
+            st.metric("💨 Wind", f"{current['windSpeed']}")
+        with m3:
+            st.metric("☁️ Conditions", current["shortForecast"])
+
+    with col_outlook:
+        st.markdown(
+            f"""
+            <div class="broadcast-panel" style="margin-top: 0;">
+                <h3 style="color: #dc2626; margin-top: 0; font-size: 1.2rem; font-weight: 800;">📊 METEOROLOGICAL DESK</h3>
+                <p style="color: #334155; font-size: 0.95rem; font-weight: 500; line-height: 1.6; margin-bottom: 15px;">
+                    {current['detailedForecast']}
+                </p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        daily_forecasts = []
+        i = 0
+        base_date = datetime.now(ZoneInfo("America/Chicago"))
+        day_counter = 0
+
+        while i < len(periods) and day_counter < 7:
+            p = periods[i]
+            current_date = base_date + timedelta(days=day_counter)
+            date_str = current_date.strftime("%m/%d")
+
+            if p["isDaytime"]:
+                day_detailed = p["detailedForecast"]
+                high_temp = f"{p['temperature']}°{p['temperatureUnit']}"
+                wind_speed = p["windSpeed"]
+                wind_dir = p.get("windDirection", "")
+                low_temp = "N/A"
+                night_detailed = ""
+
+                if i + 1 < len(periods) and not periods[i + 1]["isDaytime"]:
+                    night_p = periods[i + 1]
+                    low_temp = f"{night_p['temperature']}°{night_p['temperatureUnit']}"
+                    night_detailed = night_p["detailedForecast"]
+                    i += 1
+
+                daily_forecasts.append({
+                    "day": date_str,
+                    "high": high_temp,
+                    "low": low_temp,
+                    "detailed": day_detailed,
+                    "low_detailed": night_detailed,
+                    "wind_speed": wind_speed,
+                    "wind_dir": wind_dir,
+                })
+            else:
+                low_temp = f"{p['temperature']}°{p['temperatureUnit']}"
+                night_detailed = p["detailedForecast"]
+                wind_speed = p["windSpeed"]
+                wind_dir = p.get("windDirection", "")
+                high_temp = "N/A"
+                day_detailed = ""
+
+                if i + 1 < len(periods) and periods[i + 1]["isDaytime"]:
+                    day_p = periods[i + 1]
+                    high_temp = f"{day_p['temperature']}°{day_p['temperatureUnit']}"
+                    day_detailed = day_p["detailedForecast"]
+                    i += 1
+
+                daily_forecasts.append({
+                    "day": date_str,
+                    "high": high_temp,
+                    "low": low_temp,
+                    "detailed": day_detailed,
+                    "low_detailed": night_detailed,
+                    "wind_speed": wind_speed,
+                    "wind_dir": wind_dir,
+                })
+            i += 1
+            day_counter += 1
+
+        if (
+            not st.session_state.selected_forecast_day
+            or st.session_state.selected_forecast_day
+            not in [d["day"] for d in daily_forecasts]
+        ):
+            st.session_state.selected_forecast_day = daily_forecasts[0]["day"]
+
+        st.markdown(
+            "<h4 style='color: #0f172a; font-size: 1rem; font-weight: 800; margin-bottom: 8px;'>📅"
+            " 7-Day Regional Outlook</h4>",
+            unsafe_allow_html=True,
+        )
+        tab3, tab7 = st.tabs(["3-Day Grid", "Full 7-Day Grid"])
+
+        with tab3:
+            days_3 = daily_forecasts[:3]
+            cols3 = st.columns(len(days_3), gap="small")
+            for idx, d_item in enumerate(days_3):
+                with cols3[idx]:
+                    is_selected = d_item["day"] == st.session_state.selected_forecast_day
+                    btn_label = f"📍 {d_item['day']}" if is_selected else d_item["day"]
+                    if st.button(
+                        btn_label, key=f"btn_3_{idx}_{d_item['day']}", use_container_width=True
+                    ):
+                        st.session_state.selected_forecast_day = d_item["day"]
+                        st.rerun()
+
+        with tab7:
+            days_7 = daily_forecasts[:7]
+            cols7 = st.columns(len(days_7), gap="small")
+            for idx, d_item in enumerate(days_7):
+                with cols7[idx]:
+                    is_selected = d_item["day"] == st.session_state.selected_forecast_day
+                    btn_label = f"📍 {d_item['day']}" if is_selected else d_item["day"]
+                    if st.button(
+                        btn_label, key=f"btn_7_{idx}_{d_item['day']}", use_container_width=True
+                    ):
+                        st.session_state.selected_forecast_day = d_item["day"]
+                        st.rerun()
+
+        selected_record = next(
+            (
+                d
+                for d in daily_forecasts
+                if d["day"] == st.session_state.selected_forecast_day
+            ),
+            daily_forecasts[0],
+        )
+
+        st.markdown(
+            f"""
+            <div style="background: #ffffff; border: 1px solid #cbd5e1; border-left: 4px solid #dc2626; border-radius: 8px; padding: 14px; margin-top: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
+                <div style="font-weight: 800; color: #dc2626; font-size: 0.95rem; margin-bottom: 6px;">
+                    📋 REPORT • {selected_record['day']}
+                </div>
+                {f'<div style="font-size: 0.9rem; color: #1e293b; font-weight: 500; margin-bottom: 6px;"><strong>Day:</strong> {selected_record["detailed"]}</div>' if selected_record['detailed'] else ''}
+                {f'<div style="font-size: 0.9rem; color: #334155; font-weight: 500; margin-bottom: 8px;"><strong>Night:</strong> {selected_record["low_detailed"]}</div>' if selected_record['low_detailed'] else ''}
+                <div style="display: flex; gap: 15px; font-size: 0.85rem; color: #475569; border-top: 1px solid #e2e8f0; padding-top: 8px;">
+                    <div>High: <strong style="color: #0f172a;">{selected_record['high']}</strong></div>
+                    <div>Low: <strong style="color: #0f172a;">{selected_record['low']}</strong></div>
+                    <div>Wind: <strong style="color: #0f172a;">{selected_record['wind_speed']}</strong></div>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        # ==========================================
+        # --- EXPANDED COMMUNITY ANNOUNCEMENTS AREA ---
+        # ==========================================
+        st.markdown("<div style='margin-top: 35px;'></div>", unsafe_allow_html=True)
+        st.markdown(
+            """
+            <div style="background: #ffffff; border: 1px solid #cbd5e1; border-top: 4px solid #dc2626; border-radius: 14px; padding: 24px; box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08); margin-bottom: 25px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <h2 style="color: #0f172a; margin: 0; font-size: 1.4rem; font-weight: 800; display: flex; align-items: center; gap: 10px;">
+                        📢 TRI-STATE COMMUNITY ANNOUNCEMENTS DESK
+                    </h2>
+                    <span style="background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; padding: 3px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">PUBLIC BULLETIN BOARD</span>
+                </div>
+                <p style="color: #334155; font-size: 0.95rem; font-weight: 500; margin-bottom: 20px; line-height: 1.6;">
+                    Your direct broadcast channel for regional public notices, community gatherings, missing item alerts, and local organization updates across the tri-state area.
+                </p>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        if len(st.session_state.community_announcements) == 0:
+            st.info("No active community announcements on the board.")
+        else:
+            for idx, ann in enumerate(st.session_state.community_announcements):
+                st.markdown(
+                    f"""
+                    <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-left: 6px solid #dc2626; border-radius: 12px; padding: 22px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.04);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <strong style="color: #0f172a; font-size: 1.25rem; font-weight: 800; letter-spacing: -0.01em;">{ann['title']}</strong>
+                            <span style="color: #475569; font-size: 0.85rem; background: #e2e8f0; padding: 4px 10px; border-radius: 6px; font-weight: 700;">{ann['time']}</span>
+                        </div>
+                        <p style="color: #1e293b; font-size: 1.05rem; font-weight: 500; margin: 0 0 16px 0; line-height: 1.6;">{ann['text']}</p>
+                        <div style="color: #475569; font-size: 0.9rem; font-style: italic; border-top: 1px solid #cbd5e1; padding-top: 12px; display: flex; align-items: center; gap: 6px;">
+                            <span>Submitted by:</span> <strong style="color: #dc2626; font-weight: 700; font-style: normal;">{ann['author']}</strong>
+                        </div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+
+        st.markdown("<div style='margin-top: 25px;'></div>", unsafe_allow_html=True)
+        
+        # --- FIXED SUBMISSION FORM ---
+        st.markdown(
+            """
+            <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-top: 3px solid #dc2626; border-radius: 12px; padding: 20px; margin-bottom: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.04);">
+                <h3 style="color: #0f172a; margin-top: 0; font-size: 1.2rem; font-weight: 800; margin-bottom: 15px;">➕ Broadcast New Community Announcement</h3>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        with st.form("community_announcement_form"):
+            form_c1, form_c2, form_c3 = st.columns(3)
+            with form_c1:
+                ann_title = st.text_input("Notice Title", placeholder="e.g. Blood Drive")
+            with form_c2:
+                ann_author = st.text_input("Organization / Name", placeholder="e.g. Red Cross")
+            with form_c3:
+                pass
+            
+            ann_text = st.text_area("Announcement Details", placeholder="Provide full details here...")
+            ann_submitted = st.form_submit_button("Broadcast Notice")
+
+            if ann_submitted:
+                if ann_title.strip() and ann_text.strip() and ann_author.strip():
+                    new_item = {
+                        "author": ann_author.strip(),
+                        "title": ann_title.strip(),
+                        "text": ann_text.strip(),
+                        "time": datetime.now(ZoneInfo("America/Chicago")).strftime("%b %d, %I:%M %p")
+                    }
+                    st.session_state.community_announcements.insert(0, new_item)
+                    st.success("Announcement broadcast successfully!")
+                    time.sleep(0.5)
+                    st.rerun()
+                else:
+                    st.error("Please fill out all fields before broadcasting.")
+
+        st.markdown("</div></div>", unsafe_allow_html=True)
+
+# Execute the core broadcast fragment layout with active coordinates
+render_tsn_broadcast_center(ACTIVE_LAT, ACTIVE_LON, location_name)
