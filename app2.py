@@ -7,11 +7,43 @@ import streamlit.components.v1 as components
 
 # Page Configuration
 st.set_page_config(
-    page_title="TSN Live | Tri-State News Network",
+    page_title="Tri State News | TSN Live",
     page_icon="📡",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
+
+# --- PWA MANIFEST & APP TITLE INJECTION ---
+pwa_manifest_code = """
+<script>
+    // Create and inject the Web App Manifest dynamically
+    const manifest = {
+      "name": "Tri State News",
+      "short_name": "TSN Live",
+      "start_url": "/",
+      "display": "standalone",
+      "background_color": "#08090c",
+      "theme_color": "#ef4444",
+      "icons": [
+        {
+          "src": "777468448_1567274085055308_6458077729241826651_n_2.jpg",
+          "sizes": "512x512",
+          "type": "image/jpeg"
+        }
+      ]
+    };
+    
+    const stringManifest = JSON.stringify(manifest);
+    const blob = new Blob([stringManifest], {type: 'application/json'});
+    const manifestURL = URL.createObjectURL(blob);
+    
+    let link = document.createElement('link');
+    link.rel = 'manifest';
+    link.href = manifestURL;
+    document.head.appendChild(link);
+</script>
+"""
+components.html(pwa_manifest_code, height=0)
 
 # --- BROWSER LOCALSTORAGE & DEVICE GEOLOCATION BRIDGE ---
 geolocation_bridge_code = (
@@ -294,10 +326,10 @@ st.markdown("<div style='margin-bottom: 15px;'></div>", unsafe_allow_html=True)
 # ==========================================
 # --- INSTALL APP INSTRUCTIONS EXPANDER ---
 # ==========================================
-with st.expander("📲 How to Install TSN Live on Your Device", expanded=False):
+with st.expander("📲 How to Install Tri State News on Your Device", expanded=False):
     st.markdown(
         """
-Want quick one-tap access to TSN Live like a native mobile app? Follow the steps below for your specific device:
+Want quick one-tap access to Tri State News like a native mobile app? Follow the steps below for your specific device:
 
 ### 🍎 iPhone / iPad (Safari)
 1. Open this link in **Safari**.
@@ -314,7 +346,7 @@ Want quick one-tap access to TSN Live like a native mobile app? Follow the steps
 ### 💻 Desktop (Chrome / Edge / Safari)
 1. Open this app in **Google Chrome**, **Microsoft Edge**, or **Brave**.
 2. Look for the **install icon** (a small monitor with a down arrow or a plus sign) located on the right side of your browser address/URL bar.
-3. Click **Install** to run TSN instantly as a standalone desktop application on your computer.
+3. Click **Install** to run Tri State News instantly as a standalone desktop application on your computer.
     """
     )
 
@@ -826,7 +858,7 @@ st.markdown(
     """
 <div style="text-align: center; color: #71717a; font-size: 0.82rem; margin-top: 40px; padding-bottom: 20px;">
     <hr style="border: none; border-top: 1px solid #27272a; margin-bottom: 15px;">
-    <strong>TSN NEWS NETWORK</strong> • Tri-State Broadcast Operations & Meteorological Telemetry<br>
+    <strong>TRI STATE NEWS</strong> • Tri-State Broadcast Operations & Meteorological Telemetry<br>
     Powered by NWS Meteorological Data Servers
 </div>
 """,
