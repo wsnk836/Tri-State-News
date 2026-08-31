@@ -7,6 +7,26 @@ import streamlit.components.v1 as components
 
 # Page Configuration
 st.set_page_config(
+    import streamlit as st
+import streamlit.components.v1 as components
+
+st.set_page_config(
+    page_title="Tri-State News | TSN Live",
+    page_icon="📡",
+    layout="wide",
+    initial_sidebar_state="collapsed",
+)
+
+# --- PWA STATIC MANIFEST INJECTION ---
+pwa_manifest_code = """
+<script>
+    let link = document.createElement('link');
+    link.rel = 'manifest';
+    link.href = './app/static/manifest.json';
+    document.head.appendChild(link);
+</script>
+"""
+components.html(pwa_manifest_code, height=0)
     page_title="TSN Live | Tri-State News Network",
     page_icon="📡",
     layout="wide",
