@@ -13,18 +13,6 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-# --- USING BUILT-IN STATE STORAGE (NO GOOGLE APPS SCRIPT NEEDED) ---
-if "community_board" not in st.session_state:
-    st.session_state.community_board = [
-        {
-            "author": "TSN Desk",
-            "contact": "wsnk836@gmail.com",
-            "title": "Welcome to Tri-State Announcements",
-            "text": "System operational. Public broadcast board active.",
-            "time": datetime.now(ZoneInfo("America/Chicago")).strftime("%b %d, %I:%M %p")
-        }
-    ]
-
 # --- PWA STATIC MANIFEST INCORPORATION ---
 pwa_manifest_code = """
 <script>
@@ -352,7 +340,7 @@ with st.expander(
 ):
     st.markdown(
         """
-Want quick one-tap access to Tri-State News like a native mobile app? Follow the steps below for your specific device:
+Want quick one-tap access to Tri-State News like a native mobile app? Follow the steps below for your specific device (you can also **rename the app** during this process):
 
 ### 🍎 iPhone / iPad (Safari)
 1. Open this link in **Safari**.
@@ -372,6 +360,7 @@ Want quick one-tap access to Tri-State News like a native mobile app? Follow the
 1. Open this app in **Google Chrome**, **Microsoft Edge**, or **Brave**.
 2. Look for the **install icon** (a small monitor with a down arrow or a plus sign) located on the right side of your browser address/URL bar.
 3. Click **Install**. 
+4. *(Note: On desktop, you can usually right-click the installed app shortcut on your desktop or applications folder later to rename it to whatever you prefer).*
     """
     )
 
@@ -388,6 +377,21 @@ if "breaking_news_link" not in st.session_state:
     st.session_state.breaking_news_link = (
         "https://www.facebook.com/p/Tri-State-News-100078393567762/"
     )
+
+if "community_announcements" not in st.session_state:
+    st.session_state.community_announcements = [
+        {
+            "author": "TSN Desk",
+            "title": "Welcome to Tri-State Announcements",
+            "text": (
+                "Use the submission form below to broadcast local notices,"
+                " community events, or missing item alerts."
+            ),
+            "time": datetime.now(ZoneInfo("America/Chicago")).strftime(
+                "%b %d, %I:%M %p"
+            ),
+        },
+    ]
 
 # --- BREAKING NEWS BANNER ---
 st.markdown(
@@ -731,80 +735,186 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
             unsafe_allow_html=True,
         )
 
-    # ==========================================
-    # --- COMMUNITY ANNOUNCEMENTS BOARD ---
-    # ==========================================
-    st.markdown("<div style='margin-top: 35px;'></div>", unsafe_allow_html=True)
-    st.markdown(
-        """
-        <div style="background: #ffffff; border: 1px solid #cbd5e1; border-top: 4px solid #dc2626; border-radius: 14px; padding: 24px; box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08); margin-bottom: 25px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                <h2 style="color: #0f172a; margin: 0; font-size: 1.4rem; font-weight: 800; display: flex; align-items: center; gap: 10px;">
-                    📢 TRI-STATE COMMUNITY ANNOUNCEMENTS DESK
-                </h2>
-                <span style="background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; padding: 3px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">PUBLIC BULLETIN BOARD</span>
-            </div>
-            <p style="color: #334155; font-size: 0.95rem; font-weight: 500; margin-bottom: 20px; line-height: 1.6;">
-                Your direct broadcast channel for regional public notices, community gatherings, missing item alerts, and local organization updates across the tri-state area. All submitted notices appear instantly on this public board.
-            </p>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    community_announcements = st.session_state.community_board
-
-    if len(community_announcements) == 0:
-        st.info("No active community announcements on the board.")
-    else:
-        for idx, ann in enumerate(community_announcements):
-            st.markdown(
-                f"""
-                <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-left: 6px solid #dc2626; border-radius: 12px; padding: 22px; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.04);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                        <strong style="color: #0f172a; font-size: 1.25rem; font-weight: 800; letter-spacing: -0.01em;">{ann.get('title', 'Notice')}</strong>
-                        <span style="color: #475569; font-size: 0.85rem; background: #e2e8f0; padding: 4px 10px; border-radius: 6px; font-weight: 700;">{ann.get('time', '')}</span>
-                    </div>
-                    <p style="color: #1e293b; font-size: 1.05rem; font-weight: 500; margin: 0 0 16px 0; line-height: 1.6;">{ann.get('text', '')}</p>
-                    <div style="display: flex; gap: 15px; font-size: 0.85rem; color: #475569; border-top: 1px solid #e2e8f0; padding-top: 12px;">
-                        <div>Posted by: <strong style="color: #0f172a;">{ann.get('author', 'Anonymous')}</strong></div>
-                        <div>Contact: <strong style="color: #0f172a;">{ann.get('contact', 'N/A')}</strong></div>
-                    </div>
+        # ==========================================
+        # --- EXPANDED COMMUNITY ANNOUNCEMENTS AREA ---
+        # ==========================================
+        st.markdown("<div style='margin-top: 35px;'></div>", unsafe_allow_html=True)
+        st.markdown(
+            """
+            <div style="background: #ffffff; border: 1px solid #cbd5e1; border-top: 4px solid #dc2626; border-radius: 14px; padding: 24px; box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08); margin-bottom: 25px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <h2 style="color: #0f172a; margin: 0; font-size: 1.4rem; font-weight: 800; display: flex; align-items: center; gap: 10px;">
+                        📢 TRI-STATE COMMUNITY ANNOUNCEMENTS DESK
+                    </h2>
+                    <span style="background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; padding: 3px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">PUBLIC BULLETIN BOARD</span>
                 </div>
-                """,
-                unsafe_allow_html=True,
-            )
+                <p style="color: #334155; font-size: 0.95rem; font-weight: 500; margin-bottom: 20px; line-height: 1.6;">
+                    Your direct broadcast channel for regional public notices, community gatherings, missing item alerts, and local organization updates across the tri-state area.
+                </p>
+            """,
+            unsafe_allow_html=True,
+        )
 
-    st.markdown("</div>", unsafe_allow_html=True)
+        if len(st.session_state.community_announcements) == 0:
+            st.info("No active community announcements on the board.")
+        else:
+            for idx, ann in enumerate(st.session_state.community_announcements):
+                st.markdown(
+                    f"""
+                    <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-left: 6px solid #dc2626; border-radius: 12px; padding: 22px; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.04);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <strong style="color: #0f172a; font-size: 1.25rem; font-weight: 800; letter-spacing: -0.01em;">{ann['title']}</strong>
+                            <span style="color: #475569; font-size: 0.85rem; background: #e2e8f0; padding: 4px 10px; border-radius: 6px; font-weight: 700;">{ann['time']}</span>
+                        </div>
+                        <p style="color: #1e293b; font-size: 1.05rem; font-weight: 500; margin: 0 0 16px 0; line-height: 1.6;">{ann['text']}</p>
+                        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e2e8f0; padding-top: 10px;">
+                            <div style="color: #475569; font-size: 0.9rem; font-style: italic;">
+                                Broadcasted by: <strong style="color: #334155;">{ann['author']}</strong>
+                            </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+                if st.session_state.admin_logged_in:
+                    if st.button("🗑️ Remove Notice", key=f"remove_notice_{idx}"):
+                        st.session_state.community_announcements.pop(idx)
+                        st.success("Announcement removed successfully.")
+                        time.sleep(0.5)
+                        st.rerun()
+                st.markdown("</div></div>", unsafe_allow_html=True)
 
-    # --- SUBMIT ANNOUNCEMENT FORM ---
-    with st.expander("✍️ Submit New Community Notice", expanded=False):
-        with st.form("community_submission_form"):
-            col_a, col_b = st.columns(2)
-            with col_a:
-                author_input = st.text_input("Your Name / Organization", placeholder="e.g. John Doe or VFW Post 2950")
-            with col_b:
-                contact_input = st.text_input("Contact Info (Email or Phone)", placeholder="e.g. 515-555-0192")
-            
-            notice_title = st.text_input("Notice Title", placeholder="e.g. Community Blood Drive this Saturday")
-            notice_text = st.text_area("Notice Details", placeholder="Provide full information, times, locations, and details...")
-            
-            submitted = st.form_submit_button("Broadcast Notice to Public Board")
-            
-            if submitted:
-                if not notice_title.strip() or not notice_text.strip():
-                    st.error("Please provide both a title and details for your notice.")
-                else:
+        # Submission Form
+        st.markdown("<h4 style='color: #0f172a; font-size: 1.1rem; font-weight: 800; margin-top: 25px;'>✍️ Submit a Community Announcement</h4>", unsafe_allow_html=True)
+        with st.form("community_announcement_form"):
+            c_author = st.text_input("Your Name / Organization", placeholder="e.g. Siouxland Community Center")
+            c_title = st.text_input("Notice Title", placeholder="e.g. Annual Community Blood Drive")
+            c_text = st.text_area("Notice Details", placeholder="Provide full details, date, time, and location...")
+            c_submit = st.form_submit_button("Broadcast Notice")
+
+            if c_submit:
+                if c_author.strip() and c_title.strip() and c_text.strip():
                     new_notice = {
-                        "author": author_input.strip() or "Anonymous",
-                        "contact": contact_input.strip() or "N/A",
-                        "title": notice_title.strip(),
-                        "text": notice_text.strip(),
+                        "author": c_author.strip(),
+                        "title": c_title.strip(),
+                        "text": c_text.strip(),
                         "time": datetime.now(ZoneInfo("America/Chicago")).strftime("%b %d, %I:%M %p")
                     }
-                    st.session_state.community_board.insert(0, new_notice)
-                    st.success("Notice successfully broadcasted to the public board!")
+                    st.session_state.community_announcements.insert(0, new_notice)
+                    st.success("Notice submitted successfully to the desk!")
                     time.sleep(0.5)
                     st.rerun()
+                else:
+                    st.error("Please fill out all fields before broadcasting.")
 
-# Execute the broadcast center render loop
+        st.markdown("</div>", unsafe_allow_html=True)
+
+        # ==========================================
+        # --- FEEDBACK AND IMPROVEMENTS SECTION ---
+        # ==========================================
+        st.markdown("<div style='margin-top: 35px;'></div>", unsafe_allow_html=True)
+        st.markdown(
+            """
+            <div style="background: #ffffff; border: 1px solid #cbd5e1; border-top: 4px solid #1e293b; border-radius: 14px; padding: 24px; box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08); margin-bottom: 25px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <h2 style="color: #0f172a; margin: 0; font-size: 1.4rem; font-weight: 800; display: flex; align-items: center; gap: 10px;">
+                        💡 FEEDBACK & IMPROVEMENTS DESK
+                    </h2>
+                    <span style="background: #e2e8f0; color: #1e293b; border: 1px solid #cbd5e1; padding: 3px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">USER SUPPORT</span>
+                </div>
+                <p style="color: #334155; font-size: 0.95rem; font-weight: 500; margin-bottom: 15px; line-height: 1.6;">
+                    We are continually upgrading the TSN News Network platform to serve the Tri-State region better. Please share your suggestions, bug reports, or feature requests with our engineering desk. You can also reach us directly via email at <a href="mailto:news@tsnnet.org" style="color: #dc2626; font-weight: 700; text-decoration: none;">news@tsnnet.org</a>.
+                </p>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        feedback_html_form = """
+        <form action="https://formsubmit.co/wsnk836@gmail.com" method="POST" style="font-family: system-ui, sans-serif;">
+            <input type="hidden" name="_subject" value="New TSN App Feedback / Improvement">
+            <input type="hidden" name="_captcha" value="false">
+            <input type="hidden" name="_next" value="https://tri-state-news.streamlit.app/?feedback=success">
+            
+            <h4 style="color: #0f172a; font-size: 1.1rem; font-weight: 800; margin-top: 5px; margin-bottom: 12px;">📝 Submit Feedback or Suggestion</h4>
+            
+            <div style="margin-bottom: 12px;">
+                <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #334155; margin-bottom: 4px;">Your Name *</label>
+                <input type="text" name="name" required placeholder="e.g. John Doe" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.95rem; background: #ffffff; color: #0f172a;">
+            </div>
+            
+            <div style="margin-bottom: 12px;">
+                <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #334155; margin-bottom: 4px;">Your Email Address *</label>
+                <input type="email" name="email" required placeholder="e.g. john@example.com" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.95rem; background: #ffffff; color: #0f172a;">
+            </div>
+            
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #334155; margin-bottom: 4px;">Suggestions or Improvements *</label>
+                <textarea name="suggestion" required rows="4" placeholder="Let us know what features you'd like to see or what we can improve..." style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.95rem; background: #ffffff; color: #0f172a;"></textarea>
+            </div>
+            
+            <button type="submit" style="background-color: #dc2626; color: #ffffff; border: 1px solid #b91c1c; font-weight: 900; padding: 12px 20px; border-radius: 6px; width: 100%; cursor: pointer; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);">Submit Feedback</button>
+        </form>
+        """
+        components.html(feedback_html_form, height=430)
+
+        if query_params.get("feedback") == "success":
+            st.success("Thank you! Your feedback has been successfully emailed to wsnk836@gmail.com.")
+
+        st.markdown("</div>", unsafe_allow_html=True)
+
+        # ==========================================
+        # --- ADMIN CONTROL PANEL (MOVED TO BOTTOM) ---
+        # ==========================================
+        st.markdown("<div style='margin-top: 35px;'></div>", unsafe_allow_html=True)
+        with st.expander("🔐 Admin Control Panel", expanded=st.session_state.admin_logged_in):
+            if not st.session_state.admin_logged_in:
+                admin_pass = st.text_input("Enter Admin Password", type="password")
+                if st.button("Log In as Admin"):
+                    if admin_pass == "052723":
+                        st.session_state.admin_logged_in = True
+                        st.success("Admin login successful!")
+                        time.sleep(0.5)
+                        st.rerun()
+                    else:
+                        st.error("Incorrect admin password.")
+            else:
+                st.markdown(
+                    "<span style='color: #16a34a; font-weight: 800;'>🟢 Status: Logged in as Administrator</span>",
+                    unsafe_allow_html=True,
+                )
+                
+                st.markdown("---")
+                st.markdown("<h4 style='color: #0f172a; font-size: 1.1rem; font-weight: 800;'>🚨 Update Breaking News Banner</h4>", unsafe_allow_html=True)
+                with st.form("admin_breaking_news_form"):
+                    new_bn_title = st.text_input("Breaking News Headline", value=st.session_state.breaking_news_title)
+                    new_bn_link = st.text_input("Breaking News Destination URL", value=st.session_state.breaking_news_link)
+                    update_bn_submitted = st.form_submit_button("Update Breaking News Banner")
+
+                    if update_bn_submitted:
+                        st.session_state.breaking_news_title = new_bn_title.strip()
+                        st.session_state.breaking_news_link = new_bn_link.strip()
+                        st.success("Breaking news banner updated successfully!")
+                        time.sleep(0.5)
+                        st.rerun()
+
+                st.markdown("---")
+                st.markdown("<h4 style='color: #0f172a; font-size: 1.1rem; font-weight: 800;'>📢 Manage Community Announcements</h4>", unsafe_allow_html=True)
+                if len(st.session_state.community_announcements) == 0:
+                    st.info("No active community announcements to manage.")
+                else:
+                    for idx, ann in enumerate(st.session_state.community_announcements):
+                        col_ann_info, col_ann_del = st.columns([4, 1], vertical_alignment="center")
+                        with col_ann_info:
+                            st.markdown(f"**{ann['title']}** (by *{ann['author']}* - {ann['time']})")
+                        with col_ann_del:
+                            if st.button("Delete", key=f"admin_del_notice_{idx}", use_container_width=True):
+                                st.session_state.community_announcements.pop(idx)
+                                st.success("Announcement deleted by admin.")
+                                time.sleep(0.5)
+                                st.rerun()
+
+                st.markdown("---")
+                if st.button("Log Out Admin"):
+                    st.session_state.admin_logged_in = False
+                    st.rerun()
+
+# Run the broadcast frame
 render_tsn_broadcast_center(ACTIVE_LAT, ACTIVE_LON, location_name)
