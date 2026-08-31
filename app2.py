@@ -655,14 +655,14 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
     # ==========================================
     # --- COMMUNITY ANNOUNCEMENTS BOARD ---
     # ==========================================
-    st.markdown("<div style='margin-top: 25px;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='margin-top: 30px;'></div>", unsafe_allow_html=True)
     st.markdown(
         """
-        <div style="background: rgba(18, 19, 26, 0.95); border: 1px solid #27272a; border-top: 3px solid #ef4444; border-radius: 12px; padding: 18px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);">
-            <h3 style="color: #f87171; margin-top: 0; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
+        <div style="background: rgba(18, 19, 26, 0.95); border: 1px solid #27272a; border-top: 4px solid #ef4444; border-radius: 14px; padding: 24px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);">
+            <h2 style="color: #f87171; margin-top: 0; font-size: 1.5rem; display: flex; align-items: center; gap: 10px;">
                 📢 COMMUNITY ANNOUNCEMENTS BOARD
-            </h3>
-            <p style="color: #a1a1aa; font-size: 0.85rem; margin-bottom: 15px;">
+            </h2>
+            <p style="color: #d4d4d8; font-size: 1.05rem; margin-bottom: 20px; line-height: 1.5;">
                 View live regional notices or post your own public announcements below.
             </p>
         """,
@@ -692,10 +692,10 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
           st.session_state.admin_unlocked = False
           st.rerun()
 
-    # Display announcements with optional admin delete button
+    # Display announcements with optional admin delete button (Larger, more readable text formatting)
     if not st.session_state.community_announcements:
       st.markdown(
-          "<p style='color: #71717a; font-size: 0.85rem; font-style: italic;'>No"
+          "<p style='color: #71717a; font-size: 1rem; font-style: italic;'>No"
           " active announcements right now.</p>",
           unsafe_allow_html=True,
       )
@@ -706,13 +706,13 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
           with col_post:
             st.markdown(
                 f"""
-                <div style="background: #0f1015; border: 1px solid #27272a; border-left: 3px solid #ef4444; border-radius: 8px; padding: 12px; margin-bottom: 10px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                        <strong style="color: #fafafa; font-size: 0.9rem;">{ann['title']}</strong>
-                        <span style="color: #71717a; font-size: 0.75rem;">{ann['time']}</span>
+                <div style="background: #0f1015; border: 1px solid #27272a; border-left: 4px solid #ef4444; border-radius: 10px; padding: 18px; margin-bottom: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.4);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <strong style="color: #ffffff; font-size: 1.15rem; letter-spacing: -0.01em;">{ann['title']}</strong>
+                        <span style="color: #a1a1aa; font-size: 0.85rem; font-weight: 600;">{ann['time']}</span>
                     </div>
-                    <p style="color: #d4d4d8; font-size: 0.85rem; margin: 0 0 6px 0; line-height: 1.4;">{ann['text']}</p>
-                    <div style="color: #a1a1aa; font-size: 0.75rem; font-style: italic;">Posted by: {ann['author']}</div>
+                    <p style="color: #e4e4e7; font-size: 1.02rem; margin: 0 0 10px 0; line-height: 1.6;">{ann['text']}</p>
+                    <div style="color: #94a3b8; font-size: 0.85rem; font-style: italic;">Posted by: <strong style="color: #cbd5e1;">{ann['author']}</strong></div>
                 </div>
                 """,
                 unsafe_allow_html=True,
@@ -724,13 +724,13 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
         else:
           st.markdown(
               f"""
-              <div style="background: #0f1015; border: 1px solid #27272a; border-left: 3px solid #ef4444; border-radius: 8px; padding: 12px; margin-bottom: 10px;">
-                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                      <strong style="color: #fafafa; font-size: 0.9rem;">{ann['title']}</strong>
-                      <span style="color: #71717a; font-size: 0.75rem;">{ann['time']}</span>
+              <div style="background: #0f1015; border: 1px solid #27272a; border-left: 4px solid #ef4444; border-radius: 10px; padding: 18px; margin-bottom: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.4);">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                      <strong style="color: #ffffff; font-size: 1.15rem; letter-spacing: -0.01em;">{ann['title']}</strong>
+                      <span style="color: #a1a1aa; font-size: 0.85rem; font-weight: 600;">{ann['time']}</span>
                   </div>
-                  <p style="color: #d4d4d8; font-size: 0.85rem; margin: 0 0 6px 0; line-height: 1.4;">{ann['text']}</p>
-                  <div style="color: #a1a1aa; font-size: 0.75rem; font-style: italic;">Posted by: {ann['author']}</div>
+                  <p style="color: #e4e4e7; font-size: 1.02rem; margin: 0 0 10px 0; line-height: 1.6;">{ann['text']}</p>
+                  <div style="color: #94a3b8; font-size: 0.85rem; font-style: italic;">Posted by: <strong style="color: #cbd5e1;">{ann['author']}</strong></div>
               </div>
               """,
               unsafe_allow_html=True,
