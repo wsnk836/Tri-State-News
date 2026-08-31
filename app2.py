@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 import time
+import urllib.parse
 from zoneinfo import ZoneInfo
 import requests
 import streamlit as st
@@ -724,7 +725,7 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
                     📋 REPORT • {selected_record['day']}
                 </div>
                 {f'<div style="font-size: 0.9rem; color: #1e293b; font-weight: 500; margin-bottom: 6px;"><strong>Day:</strong> {selected_record["detailed"]}</div>' if selected_record['detailed'] else ''}
-                {f'<div style="font-size: 0.9rem; color: & #334155; font-weight: 500; margin-bottom: 8px;"><strong>Night:</strong> {selected_record["low_detailed"]}</div>' if selected_record['low_detailed'] else ''}
+                {f'<div style="font-size: 0.9rem; color: #334155; font-weight: 500; margin-bottom: 8px;"><strong>Night:</strong> {selected_record["low_detailed"]}</div>' if selected_record['low_detailed'] else ''}
                 <div style="display: flex; gap: 15px; font-size: 0.85rem; color: #475569; border-top: 1px solid #e2e8f0; padding-top: 8px;">
                     <div>High: <strong style="color: #0f172a;">{selected_record['high']}</strong></div>
                     <div>Low: <strong style="color: #0f172a;">{selected_record['low']}</strong></div>
@@ -762,7 +763,7 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
                 st.markdown(
                     f"""
                     <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-left: 6px solid #dc2626; border-radius: 12px; padding: 22px; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.04);">
-                        <div style="display: &nbsp;justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                             <strong style="color: #0f172a; font-size: 1.25rem; font-weight: 800; letter-spacing: -0.01em;">{ann['title']}</strong>
                             <span style="color: #475569; font-size: 0.85rem; background: #e2e8f0; padding: 4px 10px; border-radius: 6px; font-weight: 700;">{ann['time']}</span>
                         </div>
@@ -785,7 +786,7 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
             st.markdown(
                 """
                 <p style="color: #334155; font-size: 0.9rem; margin-bottom: 15px;">
-                    Have a local news tip, a community announcement, or app feedback? Send your submission directly to the TSN Broadcast Editors at <strong>wsnk836@gmail.com</strong> and <strong>news@tsnnet.org</strong>.
+                    Have a local news tip, a community announcement, or app feedback? Click below to instantly open your email client pre-addressed to <strong>wsnk836@gmail.com</strong> and <strong>news@tsnnet.org</strong>.
                 </p>
                 """,
                 unsafe_allow_html=True
@@ -797,17 +798,29 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
                 fb_title = st.text_input("Headline / Subject", placeholder="e.g. Annual Community Food Drive at City Park")
                 fb_message = st.text_area("Message Details", placeholder="Provide all relevant details, times, locations, or feedback notes here...")
                 
-                submitted = st.form_submit_button("Transmit to TSN Editors")
+                submitted = st.form_submit_button("Open Email Client to Send")
                 
                 if submitted:
                     if not fb_name.strip() or not fb_title.strip() or not fb_message.strip():
-                        st.error("Please fill out all required fields before transmitting.")
+                        st.error("Please fill out all required fields before sending.")
                     else:
-                        # Construct a mailto fallback string for client-side triggering or confirmation
-                        emails_target = "wsnk836@gmail.com, news@tsnnet.org"
-                        st.success(f"Submission recorded! Please ensure you also send details directly to our editors at **{emails_target}**.")
+                        recipients = "wsnk836@gmail.com,news@tsnnet.org"
+                        subject = urllib.parse.quote(f"[{fb_type}] {fb_title}")
+                        body = urllib.parse.quote(f"Name/Org: {fb_name}\nType: {fb_type}\n\nDetails:\n{fb_message}")
                         
-                        # Optionally append to community announcements if it's an announcement
+                        mailto_url = f"mailto:{recipients}?subject={subject}&body={body}"
+                        
+                        email_trigger_html = f"""
+                        <script>
+                            window.location.href = "{mailto_url}";
+                        </script>
+                        """
+                        components.html(email_trigger_html, height=0)
+                        
+                        st.success("Preparing your email client! If your device didn't open it automatically, click the secure link below:")
+                        st.markdown(f'<a href="{mailto_url}" target="_blank" style="background-color: #dc2626; color: white; padding: 10px 16px; border-radius: 6px; text-decoration: none; font-weight: 800; display: inline-block; margin-top: 10px;">✉️ Click Here to Launch Email Client</a>', unsafe_allow_html=True)
+                        
+                        # If it's a community announcement, also push it to the live board state
                         if fb_type == "Community Announcement":
                             new_item = {
                                 "author": fb_name.strip(),
@@ -816,9 +829,6 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
                                 "time": datetime.now(ZoneInfo("America/Chicago")).strftime("%b %d, %I:%M %p")
                             }
                             st.session_state.community_announcements.insert(0, new_item)
-                            st.info("Your notice has also been posted locally to the bulletin board above!")
-                            time.sleep(1)
-                            st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
 
