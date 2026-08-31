@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import time
 from zoneinfo import ZoneInfo
 import requests
@@ -498,10 +498,15 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
 
     daily_forecasts = []
     i = 0
-    while i < len(periods):
+    base_date = datetime.now(ZoneInfo("America/Chicago"))
+    day_counter = 0
+
+    while i < len(periods) and day_counter < 7:
       p = periods[i]
+      current_date = base_date + timedelta(days=day_counter)
+      date_str = current_date.strftime("%b %d")  # e.g. "Jun 06"
+
       if p["isDaytime"]:
-        day_name = p["name"]
         day_detailed = p["detailedForecast"]
         high_temp = f"{p['temperature']}°{p['temperatureUnit']}"
         wind_speed = p["windSpeed"]
@@ -516,7 +521,7 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
           i += 1
 
         daily_forecasts.append({
-            "day": day_name,
+            "day": date_str,
             "high": high_temp,
             "low": low_temp,
             "detailed": day_detailed,
@@ -525,12 +530,6 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
             "wind_dir": wind_dir,
         })
       else:
-        night_name = p["name"]
-        day_label = (
-            "Today"
-            if night_name.lower() == "tonight"
-            else night_name.replace(" Night", "").strip()
-        )
         low_temp = f"{p['temperature']}°{p['temperatureUnit']}"
         night_detailed = p["detailedForecast"]
         wind_speed = p["windSpeed"]
@@ -545,7 +544,7 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
           i += 1
 
         daily_forecasts.append({
-            "day": day_label,
+            "day": date_str,
             "high": high_temp,
             "low": low_temp,
             "detailed": day_detailed,
@@ -554,6 +553,7 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
             "wind_dir": wind_dir,
         })
       i += 1
+      day_counter += 1
 
     if (
         not st.session_state.selected_forecast_day
