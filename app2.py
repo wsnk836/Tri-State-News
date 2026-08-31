@@ -1,4 +1,6 @@
+import base64
 from datetime import datetime
+import os
 import time
 from zoneinfo import ZoneInfo
 import requests
@@ -54,21 +56,42 @@ localStorage_sync_code = """
 """
 components.html(localStorage_sync_code, height=0)
 
-# --- TACTICAL CRIMSON & CARBON CSS WITH BACKGROUND & LOGO SUPPORT ---
+# --- LOAD BACKGROUND IMAGE AS BASE64 ---
+background_image_path = (
+    "777468448_1567274085055308_6458077729241826651_n.jpg"
+)
+
+
+def get_base64_of_bin_file(bin_file):
+  if os.path.exists(bin_file):
+    with open(bin_file, "rb") as f:
+      data = f.read()
+    return base64.b64encode(data).decode()
+  return ""
+
+
+img_base64 = get_base64_of_bin_file(background_image_path)
+background_css_value = (
+    f"url('data:image/jpeg;base64,{img_base64}')"
+    if img_base64
+    else "url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1920&auto=format&fit=crop')"
+)
+
+# --- TACTICAL CRIMSON & CARBON CSS WITH VERTICAL REPEATING BACKGROUND ---
 st.markdown(
-    """
+    f"""
 <style>
-    .stApp {
-        /* Background image with a dark overlay to preserve text legibility */
-        background: linear-gradient(rgba(12, 13, 16, 0.90), rgba(12, 13, 16, 0.90)), 
-                    url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1920&auto=format&fit=crop');
-        background-size: cover;
-        background-position: center;
+    .stApp {{
+        background: linear-gradient(rgba(12, 13, 16, 0.93), rgba(12, 13, 16, 0.93)), 
+                    {background_css_value};
+        background-repeat: repeat-y;
+        background-size: 280px auto;
+        background-position: center top;
         background-attachment: fixed;
         color: #f4f4f5;
         font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    }
-    .hero-banner {
+    }}
+    .hero-banner {{
         background: linear-gradient(145deg, rgba(24, 25, 31, 0.95) 0%, rgba(14, 15, 18, 0.95) 100%);
         border: 1px solid #27272a;
         border-top: 3px solid #ef4444;
@@ -76,8 +99,8 @@ st.markdown(
         padding: 22px 28px;
         margin-bottom: 16px;
         box-shadow: 0 10px 25px -10px rgba(0, 0, 0, 0.7);
-    }
-    .hero-title {
+    }}
+    .hero-title {{
         font-size: 2rem;
         font-weight: 800;
         color: #f87171;
@@ -86,22 +109,22 @@ st.markdown(
         align-items: center;
         gap: 14px;
         letter-spacing: -0.02em;
-    }
-    .hero-logo {
+    }}
+    .hero-logo {{
         height: 42px;
         width: 42px;
         object-fit: contain;
         border-radius: 6px;
-    }
-    .hero-subtitle {
+    }}
+    .hero-subtitle {{
         color: #a1a1aa;
         font-size: 0.92rem;
         margin-top: 6px;
         letter-spacing: 0.04em;
         text-transform: uppercase;
         font-weight: 500;
-    }
-    .command-card {
+    }}
+    .command-card {{
         background: rgba(18, 19, 22, 0.88);
         backdrop-filter: blur(8px);
         border: 1px solid #27272a;
@@ -111,16 +134,16 @@ st.markdown(
         color: #e4e4e7;
         font-size: 0.96rem;
         line-height: 1.5;
-    }
-    .welcome-card { border-left: 4px solid #ef4444; }
-    .news-card {
+    }}
+    .welcome-card {{ border-left: 4px solid #ef4444; }}
+    .news-card {{
         background: rgba(239, 68, 68, 0.08);
         border: 1px solid rgba(239, 68, 68, 0.2);
         border-left: 4px solid #f87171;
         color: #fee2e2;
-    }
-    .install-card { border-left: 4px solid #38bdf8; color: #d4d4d8; font-size: 0.9rem; }
-    .alert-card-severe {
+    }}
+    .install-card {{ border-left: 4px solid #38bdf8; color: #d4d4d8; font-size: 0.9rem; }}
+    .alert-card-severe {{
         background: rgba(239, 68, 68, 0.15);
         backdrop-filter: blur(6px);
         border: 1px solid rgba(239, 68, 68, 0.3);
@@ -128,8 +151,8 @@ st.markdown(
         border-radius: 10px;
         padding: 14px 18px;
         margin-bottom: 12px;
-    }
-    .alert-card-clear {
+    }}
+    .alert-card-clear {{
         background: rgba(16, 185, 129, 0.1);
         backdrop-filter: blur(6px);
         border: 1px solid rgba(16, 185, 129, 0.25);
@@ -138,28 +161,28 @@ st.markdown(
         padding: 14px 18px;
         margin-bottom: 12px;
         color: #d1fae5;
-    }
-    [data-testid="stMetric"] {
+    }}
+    [data-testid="stMetric"] {{
         background: rgba(18, 19, 22, 0.88) !important;
         backdrop-filter: blur(8px);
         border: 1px solid #27272a;
         border-radius: 12px;
         padding: 14px 18px;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    }
-    [data-testid="stMetricLabel"] {
+    }}
+    [data-testid="stMetricLabel"] {{
         font-size: 0.85rem !important;
         color: #a1a1aa !important;
         text-transform: uppercase;
         letter-spacing: 0.05em;
-    }
-    [data-testid="stMetricValue"] {
+    }}
+    [data-testid="stMetricValue"] {{
         font-size: 1.6rem !important;
         font-weight: 700 !important;
         color: #fafafa !important;
-    }
-    .stTabs [data-baseweb="tab-list"] { gap: 8px; background-color: transparent; }
-    .stTabs [data-baseweb="tab"] {
+    }}
+    .stTabs [data-baseweb="tab-list"] {{ gap: 8px; background-color: transparent; }}
+    .stTabs [data-baseweb="tab"] {{
         border-radius: 8px;
         padding: 4px 12px;
         background-color: rgba(18, 19, 22, 0.88);
@@ -167,17 +190,17 @@ st.markdown(
         color: #a1a1aa;
         font-weight: 600;
         font-size: 0.85rem;
-    }
-    .stTabs [aria-selected="true"] {
+    }}
+    .stTabs [aria-selected="true"] {{
         background: #ef4444 !important;
         color: #0c0d10 !important;
         border-color: #ef4444 !important;
         font-weight: 700 !important;
-    }
-    @media (max-width: 768px) {
-        .block-container { padding: 1rem 0.75rem !important; }
-        .hero-title { font-size: 1.4rem; }
-    }
+    }}
+    @media (max-width: 768px) {{
+        .block-container {{ padding: 1rem 0.75rem !important; }}
+        .hero-title {{ font-size: 1.4rem; }}
+    }}
 </style>
 """,
     unsafe_allow_html=True,
@@ -200,10 +223,11 @@ except ValueError:
   ACTIVE_LON = float(default_lon)
   location_name = "Marcus, IA"
 
-# --- HERO HEADER WITH COMPANY LOGO ---
-# Replace the src URL below with your company logo URL or local path if hosted
+# --- HERO HEADER WITH LOGO ---
 company_logo_url = (
-    "https://api.iconify.design/lucide:radio-tower.svg?color=%23f87171"
+    f"data:image/jpeg;base64,{img_base64}"
+    if img_base64
+    else "https://api.iconify.design/lucide:radio-tower.svg?color=%23f87171"
 )
 
 st.markdown(
