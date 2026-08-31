@@ -519,7 +519,7 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
     while i < len(periods) and day_counter < 7:
       p = periods[i]
       current_date = base_date + timedelta(days=day_counter)
-      date_str = current_date.strftime("%b %d")  # e.g. "Aug 31"
+      date_str = current_date.strftime("%m/%d")  # e.g. "08/31"
 
       if p["isDaytime"]:
         day_detailed = p["detailedForecast"]
