@@ -40,48 +40,16 @@ geolocation_bridge_code = """
                     window.top.location.href = newUrl;
                 }
             } else {
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(
-                        async (position) => {
-                            const lat = position.coords.latitude;
-                            const lon = position.coords.longitude;
-                            sessionStorage.setItem('tsn_synced', 'true');
-                            
-                            try {
-                                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
-                                const data = await res.json();
-                                const city = data.address.city || data.address.town || data.address.village || data.address.county || 'Local Area';
-                                const state = data.address.state_code || data.address.state || '';
-                                const locName = `${city}, ${state}`.trim();
-                                
-                                localStorage.setItem('tsn_lat', lat);
-                                localStorage.setItem('tsn_lon', lon);
-                                localStorage.setItem('tsn_loc_name', locName);
-                                
-                                const newUrl = window.location.pathname + `?lat=${lat}&lon=${lon}&loc_name=${encodeURIComponent(locName)}`;
-                                window.top.location.href = newUrl;
-                            } catch (e) {
-                                localStorage.setItem('tsn_lat', lat);
-                                localStorage.setItem('tsn_lon', lon);
-                                localStorage.setItem('tsn_loc_name', 'GPS Location');
-                                const newUrl = window.location.pathname + `?lat=${lat}&lon=${lon}&loc_name=${encodeURIComponent('GPS Location')}`;
-                                window.top.location.href = newUrl;
-                            }
-                        },
-                        (error) => {
-                            sessionStorage.setItem('tsn_synced', 'true');
-                            const defLat = '41.8781';
-                            const defLon = '-87.6298';
-                            const defLoc = 'Chicago, IL';
-                            localStorage.setItem('tsn_lat', defLat);
-                            localStorage.setItem('tsn_lon', defLon);
-                            localStorage.setItem('tsn_loc_name', defLoc);
-                            const newUrl = window.location.pathname + `?lat=${defLat}&lon=${defLon}&loc_name=${encodeURIComponent(defLoc)}`;
-                            window.top.location.href = newUrl;
-                        },
-                        { timeout: 10000 }
-                    );
-                }
+                # Default fallback on first-ever load without trying browser GPS override (Defaults to KSFD region: Sioux City, IA)
+                sessionStorage.setItem('tsn_synced', 'true');
+                const defLat = '42.4006';
+                const defLon = '-96.4001';
+                const defLoc = 'Sioux City, IA';
+                localStorage.setItem('tsn_lat', defLat);
+                localStorage.setItem('tsn_lon', defLon);
+                localStorage.setItem('tsn_loc_name', defLoc);
+                const newUrl = window.location.pathname + `?lat=${defLat}&lon=${defLon}&loc_name=${encodeURIComponent(defLoc)}`;
+                window.top.location.href = newUrl;
             }
         }
     }
@@ -228,14 +196,14 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# --- QUERY PARAMS RESOLUTION ---
+# --- QUERY PARAMS RESOLUTION (Default to KSFD / Sioux City, IA) ---
 query_params = st.query_params
-default_lat = "41.8781"
-default_lon = "-87.6298"
+default_lat = "42.4006"
+default_lon = "-96.4001"
 
 lat_str = query_params.get("lat", default_lat)
 lon_str = query_params.get("lon", default_lon)
-location_name = query_params.get("loc_name", "Detecting Location...")
+location_name = query_params.get("loc_name", "Sioux City, IA")
 
 try:
   ACTIVE_LAT = round(float(lat_str), 4)
@@ -243,7 +211,7 @@ try:
 except ValueError:
   ACTIVE_LAT = float(default_lat)
   ACTIVE_LON = float(default_lon)
-  location_name = "Chicago, IL"
+  location_name = "Sioux City, IA"
 
 # --- NETWORK HEADER WITH EMBEDDED LOGO ---
 st.markdown('<div class="tsn-header-bar"></div>', unsafe_allow_html=True)
@@ -288,7 +256,7 @@ with col_badge:
 
 st.markdown("<div style='margin-bottom: 15px;'></div>", unsafe_allow_html=True)
 
-# --- BREAKING NEWS BANNER (DIRECTLY UNDER HERO BANNER) ---
+# --- BREAKING NEWS BANNER ---
 st.markdown(
     """
 <div class="breaking-news-banner">
@@ -314,7 +282,7 @@ st.markdown(
     f"""
 <div class="tsn-ticker">
     <span class="tsn-live-badge">UPDATE</span>
-    <span>Law enforcement on scene at Riverside Park • NWS Doppler radar telemetry online • System time: {cst_time}</span>
+    <span>Law enforcement on scene at Riverside Park • NWS KSFD Doppler radar telemetry online • System time: {cst_time}</span>
 </div>
 """,
     unsafe_allow_html=True,
@@ -328,7 +296,7 @@ with st.expander(
 ):
   with st.form("zip_override_form"):
     zip_input = st.text_input(
-        "US ZIP Code", placeholder="e.g. 50265 or 60601", max_chars=5
+        "US ZIP Code", placeholder="e.g. 51101 or 60601", max_chars=5
     )
     zip_submitted = st.form_submit_button("Lock ZIP Grid")
 
@@ -388,8 +356,6 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
   if "selected_forecast_day" not in st.session_state:
     st.session_state.selected_forecast_day = None
 
-  radar_station = "KDVN"
-
   # --- ACTIVE WEATHER ALERTS ---
   try:
     alerts_url = f"https://api.weather.gov/alerts/active?point={lat},{lon}"
@@ -442,7 +408,7 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
       return
 
     points_data = points_res.json()
-    radar_station = points_data["properties"].get("radarStation", "KDVN")
+    radar_station = points_data["properties"].get("radarStation", "KSFD")
     forecast_url = points_data["properties"].get("forecast")
 
     forecast_res = requests.get(forecast_url, headers=headers, timeout=10)
@@ -454,7 +420,7 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
     st.error(f"Error establishing NWS data link: {e}")
     return
 
-  # --- LAYOUT: BIGGER RADAR PROMINENTLY DISPLAYED ---
+  # --- LAYOUT: RADAR & OUTLOOK ---
   col_radar, col_outlook = st.columns([1.5, 1], gap="large")
 
   with col_radar:
