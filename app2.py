@@ -462,6 +462,8 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
                     "%b %d, %I:%M %p"
                 ),
             },
+            ]
+        
             
 
     # --- ACTIVE WEATHER ALERTS ---
