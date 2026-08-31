@@ -753,6 +753,48 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
 render_tsn_broadcast_center(ACTIVE_LAT, ACTIVE_LON, location_name)
 
 # ==========================================
+# --- OFFICIAL FACEBOOK PAGE FEED EMBED ---
+# ==========================================
+st.markdown("<div style='margin-top: 30px;'></div>", unsafe_allow_html=True)
+
+st.markdown(
+    """
+    <div style="background: rgba(18, 19, 26, 0.95); border: 1px solid #27272a; border-top: 3px solid #ef4444; border-radius: 12px; padding: 20px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6); margin-bottom: 25px;">
+        <h3 style="color: #f87171; margin-top: 0; font-size: 1.2rem; display: flex; align-items: center; gap: 8px;">
+            📰 TRI-STATE NEWS LIVE FACEBOOK FEED
+        </h3>
+        <p style="color: #a1a1aa; font-size: 0.9rem; margin-bottom: 15px;">
+            Direct broadcast updates and latest stories streamed from our official Facebook page.
+        </p>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
+# Render official responsive Facebook page plugin embed inside Streamlit component
+fb_feed_html = """
+<div style="background: #12131a; padding: 15px; border-radius: 10px; border: 1px solid #27272a; text-align: center; display: flex; justify-content: center; overflow: hidden;">
+    <div id="fb-root"></div>
+    <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v18.0"></script>
+    <div class="fb-page" 
+         data-href="https://www.facebook.com/p/Tri-State-News-100078393567762/" 
+         data-tabs="timeline" 
+         data-width="500" 
+         data-height="650" 
+         data-small-header="false" 
+         data-adapt-container-width="true" 
+         data-hide-cover="false" 
+         data-show-facepile="true">
+        <blockquote cite="https://www.facebook.com/p/Tri-State-News-100078393567762/" class="fb-xfbml-parse-ignore">
+            <a href="https://www.facebook.com/p/Tri-State-News-100078393567762/">Tri-State News</a>
+        </blockquote>
+    </div>
+</div>
+"""
+components.html(fb_feed_html, height=680, scrolling=True)
+
+
+# ==========================================
 # --- COMMUNITY FEEDBACK DESK (CLIENT-SIDE JS) ---
 # ==========================================
 st.markdown("<div style='margin: 30px 0 10px 0;'></div>", unsafe_allow_html=True)
