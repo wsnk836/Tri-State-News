@@ -1,0 +1,7 @@
+your-repo/
+├── .streamlit/
+│   ├── config.toml
+│   └── static/
+│       ├── manifest.json
+│       └── favicon_512.png
+└── your_app.py
