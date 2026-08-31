@@ -733,27 +733,30 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
             unsafe_allow_html=True,
         )
 
-        ann_cols = st.columns(2, gap="medium")
-        for idx, ann in enumerate(st.session_state.community_announcements):
-            target_col = ann_cols[idx % 2]
-            with target_col:
-                st.markdown(
-                    f"""
-                    <div style="background: #0f1015; border: 1px solid #27272a; border-left: 4px solid #ef4444; border-radius: 10px; padding: 16px; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.4); height: 160px; display: flex; flex-direction: column; justify-content: space-between;">
-                        <div>
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                                <strong style="color: #fafafa; font-size: 0.95rem; font-weight: 800;">{ann['title']}</strong>
-                                <span style="color: #71717a; font-size: 0.72rem; background: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px;">{ann['time']}</span>
+        if len(st.session_state.community_announcements) == 0:
+            st.info("No active community announcements on the board.")
+        else:
+            ann_cols = st.columns(2, gap="medium")
+            for idx, ann in enumerate(st.session_state.community_announcements):
+                target_col = ann_cols[idx % 2]
+                with target_col:
+                    st.markdown(
+                        f"""
+                        <div style="background: #0f1015; border: 1px solid #27272a; border-left: 4px solid #ef4444; border-radius: 10px; padding: 16px; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.4); height: 160px; display: flex; flex-direction: column; justify-content: space-between;">
+                            <div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                    <strong style="color: #fafafa; font-size: 0.95rem; font-weight: 800;">{ann['title']}</strong>
+                                    <span style="color: #71717a; font-size: 0.72rem; background: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px;">{ann['time']}</span>
+                                </div>
+                                <p style="color: #d4d4d8; font-size: 0.85rem; margin: 0; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">{ann['text']}</p>
                             </div>
-                            <p style="color: #d4d4d8; font-size: 0.85rem; margin: 0; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">{ann['text']}</p>
+                            <div style="color: #a1a1aa; font-size: 0.75rem; font-style: italic; border-top: 1px solid #27272a; padding-top: 6px; margin-top: 6px;">
+                                Submitted by: <strong style="color: #e4e4e7;">{ann['author']}</strong>
+                            </div>
                         </div>
-                        <div style="color: #a1a1aa; font-size: 0.75rem; font-style: italic; border-top: 1px solid #27272a; padding-top: 6px; margin-top: 6px;">
-                            Submitted by: <strong style="color: #e4e4e7;">{ann['author']}</strong>
-                        </div>
-                    </div>
-                    """,
-                    unsafe_allow_html=True,
-                )
+                        """,
+                        unsafe_allow_html=True,
+                    )
 
         st.markdown("<div style='margin-top: 10px;'></div>", unsafe_allow_html=True)
         with st.expander("➕ Broadcast New Community Announcement"):
@@ -788,6 +791,34 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
                         st.success("Announcement published successfully to the live broadcast board!")
                         time.sleep(0.3)
                         st.rerun()
+
+        # --- ADMIN REMOVAL PANEL ---
+        with st.expander("🛡️ Admin Console: Remove Unwanted Announcement"):
+            with st.form("admin_removal_form"):
+                admin_code = st.text_input("Admin Code", type="password", placeholder="Enter secure code")
+                
+                ann_options = {f"{i+1}. {a['title']} (by {a['author']})": i for i, a in enumerate(st.session_state.community_announcements)}
+                
+                if ann_options:
+                    selected_ann_label = st.selectbox("Select Notice to Remove", options=list(ann_options.keys()))
+                else:
+                    selected_ann_label = None
+                    st.write("No notices available to remove.")
+                
+                remove_submitted = st.form_submit_button("Remove Notice", use_container_width=True)
+                
+                if remove_submitted:
+                    if admin_code == "052723":
+                        if selected_ann_label and ann_options:
+                            target_index = ann_options[selected_ann_label]
+                            removed_item = st.session_state.community_announcements.pop(target_index)
+                            st.success(f"Successfully removed notice: '{removed_item['title']}'")
+                            time.sleep(0.4)
+                            st.rerun()
+                        else:
+                            st.warning("No notice selected.")
+                    else:
+                        st.error("Invalid admin code.")
 
         st.markdown("</div>", unsafe_allow_html=True)
 
