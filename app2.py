@@ -378,6 +378,60 @@ if "breaking_news_link" not in st.session_state:
         "https://www.facebook.com/p/Tri-State-News-100078393567762/"
     )
 
+if "community_announcements" not in st.session_state:
+    st.session_state.community_announcements = [
+        {
+            "author": "TSN Desk",
+            "title": "Welcome to Tri-State Announcements",
+            "text": (
+                "Use the submission form below to broadcast local notices,"
+                " community events, or missing item alerts."
+            ),
+            "time": datetime.now(ZoneInfo("America/Chicago")).strftime(
+                "%b %d, %I:%M %p"
+            ),
+        },
+    ]
+
+# ==========================================
+# --- ADMIN CONTROL PANEL EXPANDER ---
+# ==========================================
+with st.expander("🔐 Admin Control Panel", expanded=st.session_state.admin_logged_in):
+    if not st.session_state.admin_logged_in:
+        admin_pass = st.text_input("Enter Admin Password", type="password")
+        if st.button("Log In as Admin"):
+            if admin_pass == "tsnadmin2026":
+                st.session_state.admin_logged_in = True
+                st.success("Admin login successful!")
+                time.sleep(0.5)
+                st.rerun()
+            else:
+                st.error("Incorrect admin password.")
+    else:
+        st.markdown(
+            "<span style='color: #16a34a; font-weight: 800;'>🟢 Status: Logged in as Administrator</span>",
+            unsafe_allow_html=True,
+        )
+        
+        st.markdown("---")
+        st.markdown("<h4 style='color: #0f172a; font-size: 1.1rem; font-weight: 800;'>🚨 Update Breaking News Banner</h4>", unsafe_allow_html=True)
+        with st.form("admin_breaking_news_form"):
+            new_bn_title = st.text_input("Breaking News Headline", value=st.session_state.breaking_news_title)
+            new_bn_link = st.text_input("Breaking News Destination URL", value=st.session_state.breaking_news_link)
+            update_bn_submitted = st.form_submit_button("Update Breaking News Banner")
+
+            if update_bn_submitted:
+                st.session_state.breaking_news_title = new_bn_title.strip()
+                st.session_state.breaking_news_link = new_bn_link.strip()
+                st.success("Breaking news banner updated successfully!")
+                time.sleep(0.5)
+                st.rerun()
+
+        st.markdown("---")
+        if st.button("Log Out Admin"):
+            st.session_state.admin_logged_in = False
+            st.rerun()
+
 # --- BREAKING NEWS BANNER ---
 st.markdown(
     f"""
@@ -477,21 +531,6 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
 
     if "selected_forecast_day" not in st.session_state:
         st.session_state.selected_forecast_day = None
-
-    if "community_announcements" not in st.session_state:
-        st.session_state.community_announcements = [
-            {
-                "author": "TSN Desk",
-                "title": "Welcome to Tri-State Announcements",
-                "text": (
-                    "Use the submission form below to broadcast local notices,"
-                    " community events, or missing item alerts."
-                ),
-                "time": datetime.now(ZoneInfo("America/Chicago")).strftime(
-                    "%b %d, %I:%M %p"
-                ),
-            },
-        ]
 
     # --- ACTIVE WEATHER ALERTS ---
     try:
@@ -761,19 +800,26 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
             for idx, ann in enumerate(st.session_state.community_announcements):
                 st.markdown(
                     f"""
-                    <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-left: 6px solid #dc2626; border-radius: 12px; padding: 22px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.04);">
+                    <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-left: 6px solid #dc2626; border-radius: 12px; padding: 22px; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.04);">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                             <strong style="color: #0f172a; font-size: 1.25rem; font-weight: 800; letter-spacing: -0.01em;">{ann['title']}</strong>
                             <span style="color: #475569; font-size: 0.85rem; background: #e2e8f0; padding: 4px 10px; border-radius: 6px; font-weight: 700;">{ann['time']}</span>
                         </div>
                         <p style="color: #1e293b; font-size: 1.05rem; font-weight: 500; margin: 0 0 16px 0; line-height: 1.6;">{ann['text']}</p>
-                        <div style="color: #475569; font-size: 0.9rem; font-style: italic; border-top: 1px solid #e2e8f0; padding-top: 10px;">
-                            Broadcasted by: <strong style="color: #334155;">{ann['author']}</strong>
-                        </div>
-                    </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e2e8f0; padding-top: 10px;">
+                            <div style="color: #475569; font-size: 0.9rem; font-style: italic;">
+                                Broadcasted by: <strong style="color: #334155;">{ann['author']}</strong>
+                            </div>
                     """,
                     unsafe_allow_html=True,
                 )
+                if st.session_state.admin_logged_in:
+                    if st.button("🗑️ Remove Notice", key=f"remove_notice_{idx}"):
+                        st.session_state.community_announcements.pop(idx)
+                        st.success("Announcement removed successfully.")
+                        time.sleep(0.5)
+                        st.rerun()
+                st.markdown("</div></div>", unsafe_allow_html=True)
 
         # Submission Form
         st.markdown("<h4 style='color: #0f172a; font-size: 1.1rem; font-weight: 800; margin-top: 25px;'>✍️ Submit a Community Announcement</h4>", unsafe_allow_html=True)
