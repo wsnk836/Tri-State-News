@@ -395,6 +395,21 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
   if "selected_forecast_day" not in st.session_state:
     st.session_state.selected_forecast_day = None
 
+  if "community_announcements" not in st.session_state:
+    st.session_state.community_announcements = [
+        {
+            "author": "TSN Desk",
+            "title": "Welcome to Tri-State Announcements",
+            "text": (
+                "Use the submission form below to broadcast local notices,"
+                " community events, or missing item alerts."
+            ),
+            "time": datetime.now(ZoneInfo("America/Chicago")).strftime(
+                "%b %d, %I:%M %p"
+            ),
+        }
+    ]
+
   # --- ACTIVE WEATHER ALERTS ---
   try:
     alerts_url = f"https://api.weather.gov/alerts/active?point={lat},{lon}"
@@ -636,6 +651,71 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
         """,
         unsafe_allow_html=True,
     )
+
+    # ==========================================
+    # --- COMMUNITY ANNOUNCEMENTS AREA ---
+    # ==========================================
+    st.markdown("<div style='margin-top: 25px;'></div>", unsafe_allow_html=True)
+    st.markdown(
+        """
+        <div style="background: rgba(18, 19, 26, 0.95); border: 1px solid #27272a; border-top: 3px solid #ef4444; border-radius: 12px; padding: 18px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);">
+            <h3 style="color: #f87171; margin-top: 0; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
+                📢 COMMUNITY ANNOUNCEMENTS BOARD
+            </h3>
+            <p style="color: #a1a1aa; font-size: 0.85rem; margin-bottom: 15px;">
+                View live regional notices or post your own public announcements below.
+            </p>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    # Display existing announcements
+    for ann in st.session_state.community_announcements:
+      st.markdown(
+          f"""
+            <div style="background: #0f1015; border: 1px solid #27272a; border-left: 3px solid #ef4444; border-radius: 8px; padding: 12px; margin-bottom: 10px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                    <strong style="color: #fafafa; font-size: 0.9rem;">{ann['title']}</strong>
+                    <span style="color: #71717a; font-size: 0.75rem;">{ann['time']}</span>
+                </div>
+                <p style="color: #d4d4d8; font-size: 0.85rem; margin: 0 0 6px 0; line-height: 1.4;">{ann['text']}</p>
+                <div style="color: #a1a1aa; font-size: 0.75rem; font-style: italic;">Posted by: {ann['author']}</div>
+            </div>
+            """,
+          unsafe_allow_html=True,
+      )
+
+    # Submission form inside an expander to keep layout clean
+    with st.expander("➕ Post New Community Announcement"):
+      with st.form("community_announcement_form"):
+        ann_author = st.text_input("Your Name / Organization *")
+        ann_title = st.text_input("Announcement Title *")
+        ann_text = st.text_area("Announcement Details *")
+        ann_submitted = st.form_submit_button(
+            "Publish Announcement", use_container_width=True
+        )
+
+        if ann_submitted:
+          if not ann_author.strip() or not ann_title.strip() or not ann_text.strip():
+            st.error("Please fill in all required announcement fields.")
+          else:
+            current_timestamp = datetime.now(ZoneInfo("America/Chicago")).strftime(
+                "%b %d, %I:%M %p"
+            )
+            st.session_state.community_announcements.insert(
+                0,
+                {
+                    "author": ann_author.strip(),
+                    "title": ann_title.strip(),
+                    "text": ann_text.strip(),
+                    "time": current_timestamp,
+                },
+            )
+            st.success("Announcement published successfully!")
+            time.sleep(0.3)
+            st.rerun()
+
+    st.markdown("</div>", unsafe_allow_html=True)
 
 
 render_tsn_broadcast_center(ACTIVE_LAT, ACTIVE_LON, location_name)
