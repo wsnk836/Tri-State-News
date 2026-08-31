@@ -27,46 +27,46 @@ components.html(pwa_manifest_code, height=0)
 # --- BROWSER LOCALSTORAGE & DEVICE GEOLOCATION BRIDGE ---
 geolocation_bridge_code = (
     "<script>\n"
-    "   const urlParams = new URLSearchParams(window.location.search);\n"
-    "   const hasParams = urlParams.has('lat');\n\n"
-    "   if (hasParams) {\n"
-    "       if (urlParams.has('lat'))"
+    "    const urlParams = new URLSearchParams(window.location.search);\n"
+    "    const hasParams = urlParams.has('lat');\n\n"
+    "    if (hasParams) {\n"
+    "        if (urlParams.has('lat'))"
     " localStorage.setItem('tsn_lat', urlParams.get('lat'));\n"
-    "       if (urlParams.has('lon'))"
+    "        if (urlParams.has('lon'))"
     " localStorage.setItem('tsn_lon', urlParams.get('lon'));\n"
-    "       if (urlParams.has('loc_name'))"
+    "        if (urlParams.has('loc_name'))"
     " localStorage.setItem('tsn_loc_name', urlParams.get('loc_name'));\n"
-    "       sessionStorage.setItem('tsn_synced', 'true');\n"
-    "   } else {\n"
-    "       const alreadySynced = sessionStorage.getItem('tsn_synced');\n\n"
-    "       if (!alreadySynced) {\n"
-    "           const savedLat = localStorage.getItem('tsn_lat');\n"
-    "           const savedLon = localStorage.getItem('tsn_lon');\n"
-    "           const savedLoc = localStorage.getItem('tsn_loc_name');\n\n"
-    "           if (savedLat) {\n"
-    "               sessionStorage.setItem('tsn_synced', 'true');\n"
-    "               const newUrl = window.location.pathname +"
+    "        sessionStorage.setItem('tsn_synced', 'true');\n"
+    "    } else {\n"
+    "        const alreadySynced = sessionStorage.getItem('tsn_synced');\n\n"
+    "        if (!alreadySynced) {\n"
+    "            const savedLat = localStorage.getItem('tsn_lat');\n"
+    "            const savedLon = localStorage.getItem('tsn_lon');\n"
+    "            const savedLoc = localStorage.getItem('tsn_loc_name');\n\n"
+    "            if (savedLat) {\n"
+    "                sessionStorage.setItem('tsn_synced', 'true');\n"
+    "                const newUrl = window.location.pathname +"
     " `?lat=${savedLat}&lon=${savedLon}&loc_name=${encodeURIComponent(savedLoc)}`;\n"
-    "               if (window.top && window.top.history &&"
+    "                if (window.top && window.top.history &&"
     " window.top.history.replaceState) {\n"
-    "                   "
+    "                    "
     " window.top.history.replaceState(null, '', newUrl);\n"
-    "                   window.top.location.href = newUrl;\n"
-    "               }\n"
-    "           } else {\n"
-    "               sessionStorage.setItem('tsn_synced', 'true');\n"
-    "               const defLat = '42.4006';\n"
-    "               const defLon = '-96.4001';\n"
-    "               const defLoc = 'Sioux City, IA';\n"
-    "               localStorage.setItem('tsn_lat', defLat);\n"
-    "               localStorage.setItem('tsn_lon', defLon);\n"
-    "               localStorage.setItem('tsn_loc_name', defLoc);\n"
-    "               const newUrl = window.location.pathname +"
+    "                    window.top.location.href = newUrl;\n"
+    "                }\n"
+    "            } else {\n"
+    "                sessionStorage.setItem('tsn_synced', 'true');\n"
+    "                const defLat = '42.4006';\n"
+    "                const defLon = '-96.4001';\n"
+    "                const defLoc = 'Sioux City, IA';\n"
+    "                localStorage.setItem('tsn_lat', defLat);\n"
+    "                localStorage.setItem('tsn_lon', defLon);\n"
+    "                localStorage.setItem('tsn_loc_name', defLoc);\n"
+    "                const newUrl = window.location.pathname +"
     " `?lat=${defLat}&lon=${defLon}&loc_name=${encodeURIComponent(defLoc)}`;\n"
-    "               window.top.location.href = newUrl;\n"
-    "           }\n"
-    "       }\n"
-    "   }\n"
+    "                window.top.location.href = newUrl;\n"
+    "            }\n"
+    "        }\n"
+    "    }\n"
     "</script>"
 )
 components.html(geolocation_bridge_code, height=0)
@@ -367,7 +367,7 @@ Want quick one-tap access to Tri-State News like a native mobile app? Follow the
 2. Look for the **install icon** (a small monitor with a down arrow or a plus sign) located on the right side of your browser address/URL bar.
 3. Click **Install**. 
 4. *(Note: On desktop, you can usually right-click the installed app shortcut on your desktop or applications folder later to rename it to whatever you prefer).*
-        """
+    """
     )
 
 st.markdown("<div style='margin-bottom: 15px;'></div>", unsafe_allow_html=True)
@@ -383,15 +383,6 @@ if "breaking_news_link" not in st.session_state:
     st.session_state.breaking_news_link = (
         "https://www.facebook.com/p/Tri-State-News-100078393567762/"
     )
-
-if "community_feedback" not in st.session_state:
-    st.session_state.community_feedback = [
-        {
-            "name": "Tri-State Resident",
-            "text": "Great live coverage on the local weather updates. Keep up the essential work!",
-            "time": datetime.now(ZoneInfo("America/Chicago")).strftime("%b %d, %I:%M %p"),
-        }
-    ]
 
 # --- BREAKING NEWS BANNER ---
 st.markdown(
@@ -507,6 +498,8 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
                 ),
             },
         ]
+        
+        
 
     # --- ACTIVE WEATHER ALERTS ---
     try:
@@ -782,75 +775,53 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
                             <span style="color: #475569; font-size: 0.85rem; background: #e2e8f0; padding: 4px 10px; border-radius: 6px; font-weight: 700;">{ann['time']}</span>
                         </div>
                         <p style="color: #1e293b; font-size: 1.05rem; font-weight: 500; margin: 0 0 16px 0; line-height: 1.6;">{ann['text']}</p>
-                        <div style="color: #64748b; font-size: 0.85rem; font-weight: 700;">Submitted by: <span style="color: #0f172a;">{ann['author']}</span></div>
+                        <div style="color: #475569; font-size: 0.9rem; font-style: italic; border-top: 1px solid #cbd5e1; padding-top: 12px; display: flex; align-items: center; gap: 6px;">
+                            <span>Submitted by:</span> <strong style="color: #dc2626; font-weight: 700; font-style: normal;">{ann['author']}</strong>
+                        </div>
                     </div>
                     """,
                     unsafe_allow_html=True,
                 )
 
-        st.markdown("</div>", unsafe_allow_html=True)
-
-        # ==========================================
-        # --- COMMUNITY FEEDBACK & SUBMISSION PORTION ---
-        # ==========================================
-        st.markdown("<div style='margin-top: 35px;'></div>", unsafe_allow_html=True)
+        st.markdown("<div style='margin-top: 25px;'></div>", unsafe_allow_html=True)
+        
+        # --- FIXED SUBMISSION FORM ---
         st.markdown(
             """
-            <div style="background: #ffffff; border: 1px solid #cbd5e1; border-top: 4px solid #1e293b; border-radius: 14px; padding: 24px; box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08); margin-bottom: 25px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                    <h2 style="color: #0f172a; margin: 0; font-size: 1.4rem; font-weight: 800; display: flex; align-items: center; gap: 10px;">
-                        💬 COMMUNITY FEEDBACK DESK
-                    </h2>
-                    <span style="background: #e2e8f0; color: #1e293b; border: 1px solid #cbd5e1; padding: 3px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">VIEWER SUBMISSIONS</span>
-                </div>
-                <p style="color: #334155; font-size: 0.95rem; font-weight: 500; margin-bottom: 20px; line-height: 1.6;">
-                    We want to hear from you! Share your thoughts, report news tips, or give feedback on Tri-State News coverage.
-                </p>
+            <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-top: 3px solid #dc2626; border-radius: 12px; padding: 20px; margin-bottom: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.04);">
+                <h3 style="color: #0f172a; margin-top: 0; font-size: 1.2rem; font-weight: 800; margin-bottom: 15px;">➕ Broadcast New Community Announcement</h3>
             """,
             unsafe_allow_html=True,
         )
 
-        with st.form("community_feedback_form"):
-            fb_name = st.text_input("Your Name / Identifier", placeholder="e.g. Local Viewer")
-            fb_text = st.text_area("Feedback or News Tip", placeholder="Enter your comments or news tips here...")
-            fb_submitted = st.form_submit_button("Submit Feedback")
+        with st.form("community_announcement_form"):
+            form_c1, form_c2, form_c3 = st.columns(3)
+            with form_c1:
+                ann_title = st.text_input("Notice Title", placeholder="e.g. Blood Drive")
+            with form_c2:
+                ann_author = st.text_input("Organization / Name", placeholder="e.g. Red Cross")
+            with form_c3:
+                pass
+            
+            ann_text = st.text_area("Announcement Details", placeholder="Provide full details here...")
+            ann_submitted = st.form_submit_button("Broadcast Notice")
 
-            if fb_submitted:
-                if fb_text.strip():
-                    new_fb = {
-                        "name": fb_name.strip() if fb_name.strip() else "Anonymous Resident",
-                        "text": fb_text.strip(),
-                        "time": datetime.now(ZoneInfo("America/Chicago")).strftime("%b %d, %I:%M %p"),
+            if ann_submitted:
+                if ann_title.strip() and ann_text.strip() and ann_author.strip():
+                    new_item = {
+                        "author": ann_author.strip(),
+                        "title": ann_title.strip(),
+                        "text": ann_text.strip(),
+                        "time": datetime.now(ZoneInfo("America/Chicago")).strftime("%b %d, %I:%M %p")
                     }
-                    st.session_state.community_feedback.insert(0, new_fb)
-                    st.success("Thank you! Your feedback has been received.")
+                    st.session_state.community_announcements.insert(0, new_item)
+                    st.success("Announcement broadcast successfully!")
                     time.sleep(0.5)
                     st.rerun()
                 else:
-                    st.error("Please enter some text before submitting your feedback.")
+                    st.error("Please fill out all fields before broadcasting.")
 
-        st.markdown("<hr style='margin: 20px 0; border: none; border-top: 1px solid #e2e8f0;'/>", unsafe_allow_html=True)
-        st.markdown("<h4 style='color: #0f172a; font-size: 1.1rem; font-weight: 800; margin-bottom: 15px;'>Recent Viewer Feedback</h4>", unsafe_allow_html=True)
+        st.markdown("</div></div>", unsafe_allow_html=True)
 
-        if len(st.session_state.community_feedback) == 0:
-            st.info("No feedback entries submitted yet.")
-        else:
-            for fb in st.session_state.community_feedback:
-                st.markdown(
-                    f"""
-                    <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-left: 4px solid #1e293b; border-radius: 10px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.03);">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                            <strong style="color: #0f172a; font-size: 1rem; font-weight: 800;">{fb['name']}</strong>
-                            <span style="color: #64748b; font-size: 0.78rem; background: #e2e8f0; padding: 2px 8px; border-radius: 4px; font-weight: 700;">{fb['time']}</span>
-                        </div>
-                        <p style="color: #1e293b; font-size: 0.95rem; font-weight: 500; margin: 0; line-height: 1.5;">{fb['text']}</p>
-                    </div>
-                    """,
-                    unsafe_allow_html=True,
-                )
-
-        st.markdown("</div>", unsafe_allow_html=True)
-
-
-# Execute Broadcast Center Flow
+# Execute the core broadcast fragment layout with active coordinates
 render_tsn_broadcast_center(ACTIVE_LAT, ACTIVE_LON, location_name)
