@@ -246,7 +246,9 @@ st.markdown(
 )
 
 # --- NEWS TICKER ---
-cst_time = datetime.now(ZoneInfo("America/Chicago")).strftime("%I:%M:%S %p %Z")
+cst_time = datetime.now(ZoneInfo("America/Chicago")).strftime(
+    "%I:%M:%S %p %Z"
+)
 st.markdown(
     f"""
 <div class="tsn-ticker">
@@ -607,7 +609,13 @@ with st.form("network_feedback_form"):
             "message": fb_msg,
         }
         res = requests.post(
-            "https://api.web3forms.com/submit", json=payload, timeout=5
+            "https://api.web3forms.com/submit",
+            json=payload,
+            headers={
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+            },
+            timeout=5,
         )
         if res.status_code == 200:
           st.success(
