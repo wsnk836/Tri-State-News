@@ -215,10 +215,16 @@ st.markdown(
         color: #ffffff !important;
         border-color: #ef4444 !important;
     }
-    /* Force Streamlit columns to stay horizontal and prevent stacking on desktop */
+    /* Force Streamlit columns to stay horizontal and prevent stacking on desktop for all layouts */
     [data-testid="column"] {
         flex: 1 !important;
         min-width: 0 !important;
+    }
+    /* Compact font size for 7-day buttons to prevent text wrapping on smaller screens */
+    div[data-testid="column"] button {
+        font-size: 0.78rem !important;
+        padding-left: 2px !important;
+        padding-right: 2px !important;
     }
 </style>
 """,
