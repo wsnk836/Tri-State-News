@@ -3,6 +3,8 @@ import time
 from zoneinfo import ZoneInfo
 import requests
 import streamlit as st
+# MUST BE THE FIRST STREAMLIT COMMAND
+st.beta_set_page_config_(page_title='Tristate News')
 import streamlit.components.v1 as components
 
 # Page Configuration
