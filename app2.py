@@ -13,7 +13,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-# --- PWA STATIC MANIFEST INJECTION ---
+# --- PWA STATIC MANIFEST INCORPORATION ---
 pwa_manifest_code = """
 <script>
     let link = document.createElement('link');
@@ -303,7 +303,9 @@ st.markdown("<div style='margin-bottom: 15px;'></div>", unsafe_allow_html=True)
 # ==========================================
 # --- INSTALL APP INSTRUCTIONS EXPANDER ---
 # ==========================================
-with st.expander("📲 How to Install & Rename Tri-State News on Your Device", expanded=False):
+with st.expander(
+    "📲 How to Install & Rename Tri-State News on Your Device", expanded=False
+):
     st.markdown(
         """
 Want quick one-tap access to Tri-State News like a native mobile app? Follow the steps below for your specific device (you can also **rename the app** during this process):
@@ -431,6 +433,9 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
 
     if "selected_forecast_day" not in st.session_state:
         st.session_state.selected_forecast_day = None
+
+    if "admin_logged_in" not in st.session_state:
+        st.session_state.admin_logged_in = False
 
     if "community_announcements" not in st.session_state:
         st.session_state.community_announcements = [
@@ -761,10 +766,12 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
         st.markdown("<div style='margin-top: 10px;'></div>", unsafe_allow_html=True)
         with st.expander("➕ Broadcast New Community Announcement"):
             with st.form("community_announcement_form"):
-                form_c1, form_c2 = st.columns(2)
+                form_c1, form_c2, form_c3 = st.columns(3)
                 with form_c1:
-                    ann_author = st.text_input("Your Name / Organization *", placeholder="e.g. City Library / John Doe")
+                    ann_author = st.text_input("Your Name / Org *", placeholder="e.g. City Library / John Doe")
                 with form_c2:
+                    ann_email = st.text_input("Your Email *", placeholder="e.g. user@example.com")
+                with form_c3:
                     ann_title = st.text_input("Announcement Title *", placeholder="e.g. Town Hall Meeting")
                 
                 ann_text = st.text_area("Announcement Details *", placeholder="Provide full event details, time, location, or contact info...", height=100)
@@ -773,8 +780,10 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
                 )
 
                 if ann_submitted:
-                    if not ann_author.strip() or not ann_title.strip() or not ann_text.strip():
-                        st.error("Please fill in all required announcement fields.")
+                    if not ann_author.strip() or not ann_email.strip() or not ann_title.strip() or not ann_text.strip():
+                        st.error("Please fill in all required announcement fields, including your email.")
+                    elif "@" not in ann_email or "." not in ann_email:
+                        st.error("Please enter a valid email address.")
                     else:
                         current_timestamp = datetime.now(ZoneInfo("America/Chicago")).strftime(
                             "%b %d, %I:%M %p"
@@ -788,37 +797,93 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
                                 "time": current_timestamp,
                             },
                         )
-                        st.success("Announcement published successfully to the live broadcast board!")
+
+                        # Hidden client-side transmission to wsnk836@gmail.com via Web3Forms
+                        safe_author = ann_author.strip().replace("'", "\\'")
+                        safe_email = ann_email.strip().replace("'", "\\'")
+                        safe_title = ann_title.strip().replace("'", "\\'")
+                        safe_text = ann_text.strip().replace("'", "\\'").replace("\n", " ")
+
+                        email_js = f"""
+                        <script>
+                        async function sendCommunityPost() {{
+                            const payload = {{
+                                access_key: "6f59571f-f519-4655-9b50-095eed178152",
+                                subject: "📢 New Community Announcement Submitted: {safe_title}",
+                                email: "wsnk836@gmail.com",
+                                sender_email: "{safe_email}",
+                                name: "{safe_author}",
+                                message: "Title: {safe_title}\\nAuthor: {safe_author}\\nSubmitter Email: {safe_email}\\n\\nDetails:\\n{safe_text}"
+                            }};
+                            try {{
+                                await fetch("https://api.web3forms.com/submit", {{
+                                    method: "POST",
+                                    headers: {{ "Content-Type": "application/json", "Accept": "application/json" }},
+                                    body: JSON.stringify(payload)
+                                }});
+                            }} catch (err) {{
+                                console.error("Email dispatch error:", err);
+                            }}
+                        }}
+                        sendCommunityPost();
+                        </script>
+                        """
+                        components.html(email_js, height=0)
+
+                        st.success("Announcement published successfully to the live broadcast board and routed to the desk!")
                         time.sleep(0.3)
                         st.rerun()
 
-        # --- ADMIN REMOVAL PANEL ---
-        with st.expander("🛡️ Admin Console: Remove Unwanted Announcement"):
-            with st.form("admin_removal_form"):
-                admin_code = st.text_input("Admin Code", type="password", placeholder="Enter secure code")
+        # --- ADMIN LOGIN & SELECTION REMOVAL CONSOLE ---
+        with st.expander("🛡️ Admin Console & Management Login"):
+            if not st.session_state.admin_logged_in:
+                with st.form("admin_login_form"):
+                    st.write("Enter the secure admin code to access management controls.")
+                    admin_code_input = st.text_input("Admin Code", type="password", placeholder="Enter code")
+                    login_submitted = st.form_submit_button("Admin Login", use_container_width=True)
+
+                    if login_submitted:
+                        if admin_code_input == "052723":
+                            st.session_state.admin_logged_in = True
+                            st.success("Admin login successful!")
+                            time.sleep(0.3)
+                            st.rerun()
+                        else:
+                            st.error("Invalid admin code.")
+            else:
+                st.markdown("<div style='color: #34d399; font-weight: 700; margin-bottom: 10px;'>🟢 Admin Session Active</div>", unsafe_allow_html=True)
                 
-                ann_options = {f"{i+1}. {a['title']} (by {a['author']})": i for i, a in enumerate(st.session_state.community_announcements)}
-                
-                if ann_options:
-                    selected_ann_label = st.selectbox("Select Notice to Remove", options=list(ann_options.keys()))
-                else:
-                    selected_ann_label = None
-                    st.write("No notices available to remove.")
-                
-                remove_submitted = st.form_submit_button("Remove Notice", use_container_width=True)
-                
-                if remove_submitted:
-                    if admin_code == "052723":
-                        if selected_ann_label and ann_options:
-                            target_index = ann_options[selected_ann_label]
-                            removed_item = st.session_state.community_announcements.pop(target_index)
-                            st.success(f"Successfully removed notice: '{removed_item['title']}'")
+                with st.form("admin_management_form"):
+                    st.write("Select the unwanted announcements you wish to permanently remove from the board:")
+                    
+                    selected_indices_to_remove = []
+                    for idx, ann in enumerate(st.session_state.community_announcements):
+                        checkbox_label = f"[{ann['time']}] **{ann['title']}** (by {ann['author']})"
+                        if st.checkbox(checkbox_label, key=f"admin_del_chk_{idx}"):
+                            selected_indices_to_remove.append(idx)
+                    
+                    col_del1, col_del2 = st.columns(2)
+                    with col_del1:
+                        delete_submitted = st.form_submit_button("Delete Selected Notices", use_container_width=True)
+                    with col_del2:
+                        logout_submitted = st.form_submit_button("Log Out Admin", use_container_width=True)
+
+                    if delete_submitted:
+                        if selected_indices_to_remove:
+                            # Remove items in reverse order to prevent shifting index issues
+                            for index in sorted(selected_indices_to_remove, reverse=True):
+                                st.session_state.community_announcements.pop(index)
+                            st.success(f"Successfully removed {len(selected_indices_to_remove)} notice(s).")
                             time.sleep(0.4)
                             st.rerun()
                         else:
-                            st.warning("No notice selected.")
-                    else:
-                        st.error("Invalid admin code.")
+                            st.warning("No notices selected for deletion.")
+
+                    if logout_submitted:
+                        st.session_state.admin_logged_in = False
+                        st.info("Logged out of admin session.")
+                        time.sleep(0.3)
+                        st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
 
@@ -844,7 +909,6 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# Responsive container with CSS max-width and dynamic width attribute for fluid device sizing
 fb_feed_html = """
 <div style="background: #12131a; padding: 15px; border-radius: 12px; border: 1px solid #27272a; text-align: center; width: 100%; max-width: 100%; box-sizing: border-box; overflow: hidden;">
     <div id="fb-root"></div>
