@@ -303,27 +303,30 @@ st.markdown("<div style='margin-bottom: 15px;'></div>", unsafe_allow_html=True)
 # ==========================================
 # --- INSTALL APP INSTRUCTIONS EXPANDER ---
 # ==========================================
-with st.expander("📲 How to Install Tri-State News on Your Device", expanded=False):
+with st.expander("📲 How to Install & Rename Tri-State News on Your Device", expanded=False):
     st.markdown(
         """
-Want quick one-tap access to Tri-State News like a native mobile app? Follow the steps below for your specific device:
+Want quick one-tap access to Tri-State News like a native mobile app? Follow the steps below for your specific device (you can also **rename the app** during this process):
 
 ### 🍎 iPhone / iPad (Safari)
 1. Open this link in **Safari**.
 2. Tap the **Share** icon (the square with an upward arrow at the bottom of the screen).
 3. Scroll down the menu and select **"Add to Home Screen"**.
-4. Tap **Add** in the top right corner.
+4. **Rename the app:** Tap on the default title text box, clear it, and type **"TSN"** or **"Tri-State News"**.
+5. Tap **Add** in the top right corner.
 
 ### 🤖 Android (Chrome)
 1. Open this link in **Google Chrome**.
 2. Tap the **three vertical dots** (menu) in the top-right corner of the browser.
-3. Select **"Add to Home screen"** or **"Install app"**.
-4. Confirm by tapping **Install** on the prompt.
+3. Select **"Add to home screen"** or **"Install app"**.
+4. **Rename the app:** A prompt will appear showing the app title. Tap inside the title field to edit it, change it to **"TSN"** or **"Tri-State News"**, and confirm.
+5. Tap **Add** or **Install** on the prompt.
 
 ### 💻 Desktop (Chrome / Edge / Safari)
 1. Open this app in **Google Chrome**, **Microsoft Edge**, or **Brave**.
 2. Look for the **install icon** (a small monitor with a down arrow or a plus sign) located on the right side of your browser address/URL bar.
-3. Click **Install** to run Tri-State News instantly as a standalone desktop application on your computer.
+3. Click **Install**. 
+4. *(Note: On desktop, you can usually right-click the installed app shortcut on your desktop or applications folder later to rename it to whatever you prefer).*
     """
     )
 
