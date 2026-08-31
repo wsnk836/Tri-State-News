@@ -393,29 +393,8 @@ if "community_announcements" not in st.session_state:
         },
     ]
 
-# --- CAPTURE INCOMING FORM SUBMISSIONS FROM FORMSUBMIT REDIRECT ---
-if query_params.get("announcement") == "success":
-    # Check if we have temporary submission data or need to add a generic entry if params passed
-    # FormSubmit passes form fields back in URL query parameters when redirecting if configured, 
-    # or we can extract them if present. Let's check query params for author/title/details/private_contact
-    incoming_author = query_params.get("author", "Community Member")
-    incoming_contact = query_params.get("private_contact", "Not Provided")
-    incoming_title = query_params.get("title", "Community Notice")
-    incoming_text = query_params.get("details", "New community announcement posted.")
-    current_time_str = datetime.now(ZoneInfo("America/Chicago")).strftime("%b %d, %I:%M %p")
-    
-    # Prevent duplicate appends on page refresh
-    last_added = st.session_state.get("last_added_announcement", "")
-    unique_key = f"{incoming_title}_{incoming_text}"
-    if unique_key != last_added:
-        st.session_state.community_announcements.insert(0, {
-            "author": incoming_author,
-            "contact": incoming_contact,
-            "title": incoming_title,
-            "text": incoming_text,
-            "time": current_time_str
-        })
-        st.session_state["last_added_announcement"] = unique_key
+if "feedback_list" not in st.session_state:
+    st.session_state.feedback_list = []
 
 # --- BREAKING NEWS BANNER ---
 st.markdown(
@@ -760,7 +739,7 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
         )
 
         # ==========================================
-        # --- EXPANDED COMMUNITY ANNOUNCEMENTS AREA ---
+        # --- COMMUNITY ANNOUNCEMENTS BOARD ---
         # ==========================================
         st.markdown("<div style='margin-top: 35px;'></div>", unsafe_allow_html=True)
         st.markdown(
@@ -810,42 +789,31 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
                         st.rerun()
                 st.markdown("</div></div>", unsafe_allow_html=True)
 
-        # Submission Form using FormSubmit for Email Notification and Public Board Addition
+        # Native Streamlit Form for Community Announcements (Universal visibility)
         st.markdown("<h4 style='color: #0f172a; font-size: 1.1rem; font-weight: 800; margin-top: 25px;'>✍️ Submit a Community Announcement</h4>", unsafe_allow_html=True)
         
-        comm_html_form = """
-        <form action="https://formsubmit.co/wsnk836@gmail.com" method="POST" style="font-family: system-ui, sans-serif;">
-            <input type="hidden" name="_subject" value="New TSN Community Announcement Posted!">
-            <input type="hidden" name="_captcha" value="false">
-            <input type="hidden" name="_next" value="https://tri-state-news.streamlit.app/?announcement=success">
-            
-            <div style="margin-bottom: 12px;">
-                <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #334155; margin-bottom: 4px;">Your Name / Organization *</label>
-                <input type="text" name="author" required placeholder="e.g. Siouxland Community Center" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.95rem; background: #ffffff; color: #0f172a;">
-            </div>
-            
-            <div style="margin-bottom: 12px;">
-                <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #334155; margin-bottom: 4px;">Private Contact Info (Phone / Email - Admin Only) *</label>
-                <input type="text" name="private_contact" required placeholder="e.g. 555-0192 or email@example.com" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.95rem; background: #ffffff; color: #0f172a;">
-            </div>
-            
-            <div style="margin-bottom: 12px;">
-                <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #334155; margin-bottom: 4px;">Notice Title *</label>
-                <input type="text" name="title" required placeholder="e.g. Annual Community Blood Drive" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.95rem; background: #ffffff; color: #0f172a;">
-            </div>
-            
-            <div style="margin-bottom: 15px;">
-                <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #334155; margin-bottom: 4px;">Notice Details *</label>
-                <textarea name="details" required rows="4" placeholder="Provide full details, date, time, and location..." style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.95rem; background: #ffffff; color: #0f172a;"></textarea>
-            </div>
-            
-            <button type="submit" style="background-color: #dc2626; color: #ffffff; border: 1px solid #b91c1c; font-weight: 900; padding: 12px 20px; border-radius: 6px; width: 100%; cursor: pointer; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);">Broadcast Notice to Public Board</button>
-        </form>
-        """
-        components.html(comm_html_form, height=490)
+        with st.form("community_announcement_native_form"):
+            comm_author = st.text_input("Your Name / Organization *", placeholder="e.g. Siouxland Community Center")
+            comm_contact = st.text_input("Private Contact Info (Phone / Email - Admin Only) *", placeholder="e.g. 555-0192 or email@example.com")
+            comm_title = st.text_input("Notice Title *", placeholder="e.g. Annual Community Blood Drive")
+            comm_details = st.text_area("Notice Details *", placeholder="Provide full details, date, time, and location...")
+            comm_submitted = st.form_submit_button("Broadcast Notice to Public Board")
 
-        if query_params.get("announcement") == "success":
-            st.success("Notice successfully broadcasted to the public board and email notification sent to wsnk836@gmail.com!")
+            if comm_submitted:
+                if comm_author.strip() and comm_contact.strip() and comm_title.strip() and comm_details.strip():
+                    current_time_str = datetime.now(ZoneInfo("America/Chicago")).strftime("%b %d, %I:%M %p")
+                    st.session_state.community_announcements.insert(0, {
+                        "author": comm_author.strip(),
+                        "contact": comm_contact.strip(),
+                        "title": comm_title.strip(),
+                        "text": comm_details.strip(),
+                        "time": current_time_str
+                    })
+                    st.success("Notice successfully broadcasted to the public board for all users to see!")
+                    time.sleep(0.6)
+                    st.rerun()
+                else:
+                    st.error("Please fill out all required fields before broadcasting.")
 
         st.markdown("</div>", unsafe_allow_html=True)
 
@@ -869,36 +837,39 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
             unsafe_allow_html=True,
         )
 
-        feedback_html_form = """
-        <form action="https://formsubmit.co/wsnk836@gmail.com" method="POST" style="font-family: system-ui, sans-serif;">
-            <input type="hidden" name="_subject" value="New TSN App Feedback / Improvement">
-            <input type="hidden" name="_captcha" value="false">
-            <input type="hidden" name="_next" value="https://tri-state-news.streamlit.app/?feedback=success">
-            
-            <h4 style="color: #0f172a; font-size: 1.1rem; font-weight: 800; margin-top: 5px; margin-bottom: 12px;">📝 Submit Feedback or Suggestion</h4>
-            
-            <div style="margin-bottom: 12px;">
-                <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #334155; margin-bottom: 4px;">Your Name *</label>
-                <input type="text" name="name" required placeholder="e.g. John Doe" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.95rem; background: #ffffff; color: #0f172a;">
-            </div>
-            
-            <div style="margin-bottom: 12px;">
-                <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #334155; margin-bottom: 4px;">Your Email Address *</label>
-                <input type="email" name="email" required placeholder="e.g. john@example.com" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.95rem; background: #ffffff; color: #0f172a;">
-            </div>
-            
-            <div style="margin-bottom: 15px;">
-                <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #334155; margin-bottom: 4px;">Suggestions or Improvements *</label>
-                <textarea name="suggestion" required rows="4" placeholder="Let us know what features you'd like to see or what we can improve..." style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.95rem; background: #ffffff; color: #0f172a;"></textarea>
-            </div>
-            
-            <button type="submit" style="background-color: #dc2626; color: #ffffff; border: 1px solid #b91c1c; font-weight: 900; padding: 12px 20px; border-radius: 6px; width: 100%; cursor: pointer; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);">Submit Feedback</button>
-        </form>
-        """
-        components.html(feedback_html_form, height=430)
+        # Native Streamlit Form for Feedback
+        with st.form("feedback_native_form"):
+            st.markdown("<h4 style='color: #0f172a; font-size: 1.1rem; font-weight: 800; margin-top: 5px; margin-bottom: 12px;'>📝 Submit Feedback or Suggestion</h4>", unsafe_allow_html=True)
+            fb_name = st.text_input("Your Name *", placeholder="e.g. John Doe", key="fb_name_input")
+            fb_email = st.text_input("Your Email Address *", placeholder="e.g. john@example.com", key="fb_email_input")
+            fb_suggestion = st.text_area("Suggestions or Improvements *", placeholder="Let us know what features you'd like to see or what we can improve...", key="fb_sugg_input")
+            fb_submitted = st.form_submit_button("Submit Feedback")
 
-        if query_params.get("feedback") == "success":
-            st.success("Thank you! Your feedback has been successfully emailed to wsnk836@gmail.com.")
+            if fb_submitted:
+                if fb_name.strip() and fb_email.strip() and fb_suggestion.strip():
+                    current_time_str = datetime.now(ZoneInfo("America/Chicago")).strftime("%b %d, %I:%M %p")
+                    st.session_state.feedback_list.insert(0, {
+                        "name": fb_name.strip(),
+                        "email": fb_email.strip(),
+                        "text": fb_suggestion.strip(),
+                        "time": current_time_str
+                    })
+                    st.success("Thank you! Your feedback has been successfully recorded and sent to the editorial desk.")
+                    time.sleep(0.6)
+                    st.rerun()
+                else:
+                    st.error("Please fill out all required fields before submitting feedback.")
+
+        # If admin is logged in, show submitted feedback items
+        if st.session_state.admin_logged_in and len(st.session_state.feedback_list) > 0:
+            st.markdown("<h4 style='color: #0f172a; font-size: 1rem; font-weight: 800; margin-top: 20px;'>📥 Received User Feedback (Admin View)</h4>", unsafe_allow_html=True)
+            for f_idx, f_item in enumerate(st.session_state.feedback_list):
+                st.markdown(f"""
+                <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px; margin-bottom: 8px; font-size: 0.9rem;">
+                    <strong>{f_item['name']}</strong> ({f_item['email']}) - <em>{f_item['time']}</em><br/>
+                    {f_item['text']}
+                </div>
+                """, unsafe_allow_html=True)
 
         st.markdown("</div>", unsafe_allow_html=True)
 
