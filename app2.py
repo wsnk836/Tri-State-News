@@ -1,63 +1,137 @@
-# ==========================================
-# --- COMMUNITY FEEDBACK DESK (NATIVE PYTHON) ---
-# ==========================================
-st.markdown("<div style='margin: 30px 0 10px 0;'></div>", unsafe_allow_html=True)
+from datetime import datetime
+import time
+from zoneinfo import ZoneInfo
+import requests
+import streamlit as st
+import streamlit.components.v1 as components
 
-st.markdown(
-    """
-<div style="background: rgba(18, 19, 26, 0.95); border: 1px solid #27272a; border-top: 3px solid #ef4444; border-radius: 12px; padding: 20px; font-family: system-ui, -apple-system, sans-serif; color: #f4f4f5; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);">
-    <h3 style="color: #f87171; margin-top: 0; font-size: 1.2rem;">💬 TSN VIEWER & COMMUNITY FEEDBACK DESK</h3>
-    <p style="color: #a1a1aa; font-size: 0.9rem; margin-bottom: 15px;">
-        Have news tips, weather updates, or suggestions for the network? Send your message directly to the TSN desk at <strong style="color: #fafafa;">wsnk836@gmail.com</strong>.
-    </p>
-</div>
-""",
-    unsafe_allow_html=True,
+# Page Configuration
+st.set_page_config(
+    page_title="TSN Live | Tri-State News Network",
+    page_icon="📡",
+    layout="wide",
+    initial_sidebar_state="collapsed",
 )
 
-with st.form("tsn_feedback_form", clear_on_submit=True):
-  fb_name = st.text_input("Viewer Name *", placeholder="Your Name")
-  fb_loc = st.text_input("Your Location / Grid (Optional)", placeholder="City or ZIP")
-  fb_msg = st.text_area(
-      "Feedback or News Tip *",
-      placeholder="Enter your message, news tip, or suggestion here...",
-  )
-  submit_feedback = st.form_submit_button(
-      "Transmit Feedback to Desk", use_container_width=True
-  )
+# --- BROWSER LOCALSTORAGE & DEVICE GEOLOCATION BRIDGE ---
+geolocation_bridge_code = """
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const hasParams = urlParams.has('lat');
 
-  if submit_feedback:
-    if not fb_name.strip() or not fb_msg.strip():
-      st.error(
-          "⚠️ Transmission error: Please provide both your name and message."
-      )
-    else:
-      try:
-        payload = {
-            "access_key": "6f59571f-f519-4655-9b50-095eed178152",
-            "subject": (
-                "💡 Community Feedback and Suggestions from TSN News Network"
-            ),
-            "name": fb_name.strip(),
-            "location": fb_loc.strip() if fb_loc else "Not provided",
-            "message": fb_msg.strip(),
+    if (hasParams) {
+        if (urlParams.has('lat')) localStorage.setItem('tsn_lat', urlParams.get('lat'));
+        if (urlParams.has('lon')) localStorage.setItem('tsn_lon', urlParams.get('lon'));
+        if (urlParams.has('loc_name')) localStorage.setItem('tsn_loc_name', urlParams.get('loc_name'));
+        sessionStorage.setItem('tsn_synced', 'true');
+    } else {
+        const alreadySynced = sessionStorage.getItem('tsn_synced');
+        
+        if (!alreadySynced) {
+            const savedLat = localStorage.getItem('tsn_lat');
+            const savedLon = localStorage.getItem('tsn_lon');
+            const savedLoc = localStorage.getItem('tsn_loc_name');
+
+            if (savedLat) {
+                sessionStorage.setItem('tsn_synced', 'true');
+                const newUrl = window.location.pathname + `?lat=${savedLat}&lon=${savedLon}&loc_name=${encodeURIComponent(savedLoc)}`;
+                if (window.top && window.top.history && window.top.history.replaceState) {
+                    window.top.history.replaceState(null, '', newUrl);
+                    window.top.location.href = newUrl;
+                }
+            } else {
+                sessionStorage.setItem('tsn_synced', 'true');
+                const defLat = '42.4006';
+                const defLon = '-96.4001';
+                const defLoc = 'Sioux City, IA';
+                localStorage.setItem('tsn_lat', defLat);
+                localStorage.setItem('tsn_lon', defLon);
+                localStorage.setItem('tsn_loc_name', defLoc);
+                const newUrl = window.location.pathname + `?lat=${defLat}&lon=${defLon}&loc_name=${encodeURIComponent(defLoc)}`;
+                window.top.location.href = newUrl;
+            }
         }
-        response = requests.post(
-            "https://api.web3forms.com/submit", json=payload, timeout=10
-        )
-        data = response.json()
+    }
+</script>
+"""
+components.html(geolocation_bridge_code, height=0)
 
-        if response.status_code == 200 and data.get("success"):
-          st.success(
-              "✅ Feedback successfully transmitted directly to"
-              " wsnk836@gmail.com!"
-          )
-        else:
-          st.error(
-              "❌ Server relay error: "
-              + data.get("message", "Please try again shortly.")
-          )
-      except Exception as e:
-        st.error(
-            f"❌ Network connection error ({e}). Please check your connection."
-        )
+# --- PROFESSIONAL TSN BROADCAST NETWORK STYLING ---
+st.markdown(
+    """
+<style>
+    .stApp {
+        background-color: #08090c;
+        color: #f4f4f5;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    .tsn-header-bar {
+        background: linear-gradient(90deg, #b91c1c 0%, #ef4444 50%, #181922 100%);
+        padding: 4px 0;
+        margin-bottom: 20px;
+        border-radius: 6px;
+        box-shadow: 0 4px 20px rgba(185, 28, 28, 0.4);
+    }
+    .tsn-ticker {
+        background: #0f1015;
+        border-top: 1px solid #ef4444;
+        border-bottom: 1px solid #27272a;
+        color: #fca5a5;
+        padding: 8px 16px;
+        font-weight: 700;
+        font-size: 0.88rem;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        border-radius: 4px;
+        margin-bottom: 20px;
+    }
+    .tsn-live-badge {
+        background: #ef4444;
+        color: #ffffff;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 900;
+        animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.5; }
+        100% { opacity: 1; }
+    }
+    .breaking-news-banner {
+        background: linear-gradient(135deg, rgba(185, 28, 28, 0.25) 0%, rgba(18, 19, 26, 0.95) 100%);
+        border: 1px solid rgba(239, 68, 68, 0.5);
+        border-left: 6px solid #ef4444;
+        border-radius: 10px;
+        padding: 16px 20px;
+        margin-bottom: 25px;
+        box-shadow: 0 6px 20px rgba(185, 28, 28, 0.25);
+        transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .breaking-news-banner:hover {
+        border-color: #ef4444;
+        transform: translateY(-2px);
+    }
+    .breaking-news-link {
+        color: #ffffff;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+    }
+    .breaking-news-link:hover {
+        color: #fca5a5;
+    }
+    .broadcast-panel {
+        background: rgba(18, 19, 26, 0.95);
+        border: 1px solid #27272a;
+        border-top: 3px solid #ef4444;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
