@@ -444,7 +444,31 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
                 "time": datetime.now(ZoneInfo("America/Chicago")).strftime(
                     "%b %d, %I:%M %p"
                 ),
-            }
+            },
+            {
+                "author": "Tri-State County Fair Committee",
+                "title": "Annual Summer Fair Volunteer Sign-Up Open",
+                "text": (
+                    "We are looking for local volunteers for the upcoming Tri-State"
+                    " County Fair booths, parking coordination, and family"
+                    " entertainment areas. Free entry passes provided for all shifts."
+                ),
+                "time": datetime.now(ZoneInfo("America/Chicago")).strftime(
+                    "%b %d, %I:%M %p"
+                ),
+            },
+            {
+                "author": "Metro Transit Authority",
+                "title": "Scheduled Route Upgrades & Weekend Detours",
+                "text": (
+                    "Please note that downtown transit lines will operate on a modified"
+                    " weekend schedule due to utility maintenance along Main Street."
+                    " Check the regional transport portal for alternative stops."
+                ),
+                "time": datetime.now(ZoneInfo("America/Chicago")).strftime(
+                    "%b %d, %I:%M %p"
+                ),
+            },
         ]
 
     # --- ACTIVE WEATHER ALERTS ---
@@ -690,44 +714,59 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
         )
 
         # ==========================================
-        # --- COMMUNITY ANNOUNCEMENTS AREA ---
+        # --- EXPANDED COMMUNITY ANNOUNCEMENTS AREA ---
         # ==========================================
-        st.markdown("<div style='margin-top: 25px;'></div>", unsafe_allow_html=True)
+        st.markdown("<div style='margin-top: 35px;'></div>", unsafe_allow_html=True)
         st.markdown(
             """
-            <div style="background: rgba(18, 19, 26, 0.95); border: 1px solid #27272a; border-top: 3px solid #ef4444; border-radius: 12px; padding: 18px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);">
-                <h3 style="color: #f87171; margin-top: 0; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
-                    📢 COMMUNITY ANNOUNCEMENTS BOARD
-                </h3>
-                <p style="color: #a1a1aa; font-size: 0.85rem; margin-bottom: 15px;">
-                    View live regional notices or post your own public announcements below.
+            <div style="background: rgba(18, 19, 26, 0.98); border: 1px solid #27272a; border-top: 4px solid #ef4444; border-radius: 14px; padding: 24px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7); margin-bottom: 25px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <h2 style="color: #f87171; margin: 0; font-size: 1.4rem; display: flex; align-items: center; gap: 10px;">
+                        📢 TRI-STATE COMMUNITY ANNOUNCEMENTS DESK
+                    </h2>
+                    <span style="background: rgba(239, 68, 68, 0.15); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); padding: 3px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">PUBLIC BULLETIN BOARD</span>
+                </div>
+                <p style="color: #d4d4d8; font-size: 0.95rem; margin-bottom: 20px; line-height: 1.5;">
+                    Your direct broadcast channel for regional public notices, community gatherings, missing item alerts, and local organization updates across the tri-state area.
                 </p>
             """,
             unsafe_allow_html=True,
         )
 
-        for ann in st.session_state.community_announcements:
-            st.markdown(
-                f"""
-                <div style="background: #0f1015; border: 1px solid #27272a; border-left: 3px solid #ef4444; border-radius: 8px; padding: 12px; margin-bottom: 10px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                        <strong style="color: #fafafa; font-size: 0.9rem;">{ann['title']}</strong>
-                        <span style="color: #71717a; font-size: 0.75rem;">{ann['time']}</span>
+        ann_cols = st.columns(2, gap="medium")
+        for idx, ann in enumerate(st.session_state.community_announcements):
+            target_col = ann_cols[idx % 2]
+            with target_col:
+                st.markdown(
+                    f"""
+                    <div style="background: #0f1015; border: 1px solid #27272a; border-left: 4px solid #ef4444; border-radius: 10px; padding: 16px; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.4); height: 160px; display: flex; flex-direction: column; justify-content: space-between;">
+                        <div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                <strong style="color: #fafafa; font-size: 0.95rem; font-weight: 800;">{ann['title']}</strong>
+                                <span style="color: #71717a; font-size: 0.72rem; background: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px;">{ann['time']}</span>
+                            </div>
+                            <p style="color: #d4d4d8; font-size: 0.85rem; margin: 0; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">{ann['text']}</p>
+                        </div>
+                        <div style="color: #a1a1aa; font-size: 0.75rem; font-style: italic; border-top: 1px solid #27272a; padding-top: 6px; margin-top: 6px;">
+                            Submitted by: <strong style="color: #e4e4e7;">{ann['author']}</strong>
+                        </div>
                     </div>
-                    <p style="color: #d4d4d8; font-size: 0.85rem; margin: 0 0 6px 0; line-height: 1.4;">{ann['text']}</p>
-                    <div style="color: #a1a1aa; font-size: 0.75rem; font-style: italic;">Posted by: {ann['author']}</div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
+                    """,
+                    unsafe_allow_html=True,
+                )
 
-        with st.expander("➕ Post New Community Announcement"):
+        st.markdown("<div style='margin-top: 10px;'></div>", unsafe_allow_html=True)
+        with st.expander("➕ Broadcast New Community Announcement"):
             with st.form("community_announcement_form"):
-                ann_author = st.text_input("Your Name / Organization *")
-                ann_title = st.text_input("Announcement Title *")
-                ann_text = st.text_area("Announcement Details *")
+                form_c1, form_c2 = st.columns(2)
+                with form_c1:
+                    ann_author = st.text_input("Your Name / Organization *", placeholder="e.g. City Library / John Doe")
+                with form_c2:
+                    ann_title = st.text_input("Announcement Title *", placeholder="e.g. Town Hall Meeting")
+                
+                ann_text = st.text_area("Announcement Details *", placeholder="Provide full event details, time, location, or contact info...", height=100)
                 ann_submitted = st.form_submit_button(
-                    "Publish Announcement", use_container_width=True
+                    "Publish Notice to Network", use_container_width=True
                 )
 
                 if ann_submitted:
@@ -746,7 +785,7 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
                                 "time": current_timestamp,
                             },
                         )
-                        st.success("Announcement published successfully!")
+                        st.success("Announcement published successfully to the live broadcast board!")
                         time.sleep(0.3)
                         st.rerun()
 
