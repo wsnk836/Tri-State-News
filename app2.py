@@ -220,10 +220,12 @@ except ValueError:
   ACTIVE_LON = float(default_lon)
   location_name = "Chicago, IL"
 
-# --- NETWORK HEADER WITH LOGO ---
+# --- NETWORK HEADER WITH EMBEDDED LOGO ---
 st.markdown('<div class="tsn-header-bar"></div>', unsafe_allow_html=True)
 
-col_logo, col_title, col_badge = st.columns([0.6, 3.4, 1.2], vertical_alignment="bottom")
+col_logo, col_title, col_badge = st.columns(
+    [0.6, 3.4, 1.2], vertical_alignment="bottom"
+)
 
 with col_logo:
   try:
