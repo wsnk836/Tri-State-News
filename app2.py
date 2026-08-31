@@ -382,6 +382,7 @@ if "community_announcements" not in st.session_state:
     st.session_state.community_announcements = [
         {
             "author": "TSN Desk",
+            "contact": "wsnk836@gmail.com",
             "title": "Welcome to Tri-State Announcements",
             "text": (
                 "Use the submission form below to broadcast local notices,"
@@ -770,10 +771,14 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
                         <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e2e8f0; padding-top: 10px;">
                             <div style="color: #475569; font-size: 0.9rem; font-style: italic;">
                                 Broadcasted by: <strong style="color: #334155;">{ann['author']}</strong>
-                            </div>
                     """,
                     unsafe_allow_html=True,
                 )
+                if st.session_state.admin_logged_in:
+                    st.markdown(f" | <span style='color: #dc2626;'>Private Contact:</span> <strong style='color: #0f172a;'>{ann.get('contact', 'None provided')}</strong>", unsafe_allow_html=True)
+                
+                st.markdown("</div>", unsafe_allow_html=True)
+                
                 if st.session_state.admin_logged_in:
                     if st.button("🗑️ Remove Notice", key=f"remove_notice_{idx}"):
                         st.session_state.community_announcements.pop(idx)
@@ -782,28 +787,42 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
                         st.rerun()
                 st.markdown("</div></div>", unsafe_allow_html=True)
 
-        # Submission Form
+        # Submission Form using FormSubmit for Email Notification
         st.markdown("<h4 style='color: #0f172a; font-size: 1.1rem; font-weight: 800; margin-top: 25px;'>✍️ Submit a Community Announcement</h4>", unsafe_allow_html=True)
-        with st.form("community_announcement_form"):
-            c_author = st.text_input("Your Name / Organization", placeholder="e.g. Siouxland Community Center")
-            c_title = st.text_input("Notice Title", placeholder="e.g. Annual Community Blood Drive")
-            c_text = st.text_area("Notice Details", placeholder="Provide full details, date, time, and location...")
-            c_submit = st.form_submit_button("Broadcast Notice")
+        
+        comm_html_form = """
+        <form action="https://formsubmit.co/wsnk836@gmail.com" method="POST" style="font-family: system-ui, sans-serif;">
+            <input type="hidden" name="_subject" value="New TSN Community Announcement Posted!">
+            <input type="hidden" name="_captcha" value="false">
+            <input type="hidden" name="_next" value="https://tri-state-news.streamlit.app/?announcement=success">
+            
+            <div style="margin-bottom: 12px;">
+                <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #334155; margin-bottom: 4px;">Your Name / Organization *</label>
+                <input type="text" name="author" required placeholder="e.g. Siouxland Community Center" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.95rem; background: #ffffff; color: #0f172a;">
+            </div>
+            
+            <div style="margin-bottom: 12px;">
+                <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #334155; margin-bottom: 4px;">Private Contact Info (Phone / Email - Admin Only) *</label>
+                <input type="text" name="private_contact" required placeholder="e.g. 555-0192 or email@example.com" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.95rem; background: #ffffff; color: #0f172a;">
+            </div>
+            
+            <div style="margin-bottom: 12px;">
+                <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #334155; margin-bottom: 4px;">Notice Title *</label>
+                <input type="text" name="title" required placeholder="e.g. Annual Community Blood Drive" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.95rem; background: #ffffff; color: #0f172a;">
+            </div>
+            
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #334155; margin-bottom: 4px;">Notice Details *</label>
+                <textarea name="details" required rows="4" placeholder="Provide full details, date, time, and location..." style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.95rem; background: #ffffff; color: #0f172a;"></textarea>
+            </div>
+            
+            <button type="submit" style="background-color: #dc2626; color: #ffffff; border: 1px solid #b91c1c; font-weight: 900; padding: 12px 20px; border-radius: 6px; width: 100%; cursor: pointer; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);">Broadcast Notice</button>
+        </form>
+        """
+        components.html(comm_html_form, height=490)
 
-            if c_submit:
-                if c_author.strip() and c_title.strip() and c_text.strip():
-                    new_notice = {
-                        "author": c_author.strip(),
-                        "title": c_title.strip(),
-                        "text": c_text.strip(),
-                        "time": datetime.now(ZoneInfo("America/Chicago")).strftime("%b %d, %I:%M %p")
-                    }
-                    st.session_state.community_announcements.insert(0, new_notice)
-                    st.success("Notice submitted successfully to the desk!")
-                    time.sleep(0.5)
-                    st.rerun()
-                else:
-                    st.error("Please fill out all fields before broadcasting.")
+        if query_params.get("announcement") == "success":
+            st.success("Notice successfully broadcasted and email notification sent to wsnk836@gmail.com!")
 
         st.markdown("</div>", unsafe_allow_html=True)
 
@@ -861,7 +880,7 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
         st.markdown("</div>", unsafe_allow_html=True)
 
         # ==========================================
-        # --- ADMIN CONTROL PANEL (MOVED TO BOTTOM) ---
+        # --- ADMIN CONTROL PANEL (AT THE BOTTOM) ---
         # ==========================================
         st.markdown("<div style='margin-top: 35px;'></div>", unsafe_allow_html=True)
         with st.expander("🔐 Admin Control Panel", expanded=st.session_state.admin_logged_in):
@@ -903,7 +922,8 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
                     for idx, ann in enumerate(st.session_state.community_announcements):
                         col_ann_info, col_ann_del = st.columns([4, 1], vertical_alignment="center")
                         with col_ann_info:
-                            st.markdown(f"**{ann['title']}** (by *{ann['author']}* - {ann['time']})")
+                            contact_disp = ann.get('contact', 'None')
+                            st.markdown(f"**{ann['title']}** (by *{ann['author']}* | Contact: `{contact_disp}`) - {ann['time']}")
                         with col_ann_del:
                             if st.button("Delete", key=f"admin_del_notice_{idx}", use_container_width=True):
                                 st.session_state.community_announcements.pop(idx)
