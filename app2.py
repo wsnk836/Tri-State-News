@@ -135,6 +135,31 @@ st.markdown(
         50% { opacity: 0.5; }
         100% { opacity: 1; }
     }
+    .breaking-news-banner {
+        background: linear-gradient(135deg, rgba(185, 28, 28, 0.25) 0%, rgba(24, 25, 32, 0.95) 100%);
+        border: 1px solid rgba(239, 68, 68, 0.5);
+        border-left: 6px solid #ef4444;
+        border-radius: 10px;
+        padding: 16px 20px;
+        margin-bottom: 25px;
+        box-shadow: 0 6px 20px rgba(185, 28, 28, 0.25);
+        transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .breaking-news-banner:hover {
+        border-color: #ef4444;
+        transform: translateY(-2px);
+    }
+    .breaking-news-link {
+        color: #ffffff;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+    }
+    .breaking-news-link:hover {
+        color: #fca5a5;
+    }
     .broadcast-panel {
         background: rgba(18, 19, 26, 0.95);
         border: 1px solid #27272a;
@@ -263,6 +288,24 @@ with col_badge:
 
 st.markdown("<div style='margin-bottom: 15px;'></div>", unsafe_allow_html=True)
 
+# --- BREAKING NEWS BANNER (DIRECTLY UNDER HERO BANNER) ---
+st.markdown(
+    """
+<div class="breaking-news-banner">
+    <a href="https://www.facebook.com/p/Tri-State-News-100078393567762/" target="_blank" class="breaking-news-link">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <span class="tsn-live-badge">BREAKING NEWS</span>
+            <span style="font-size: 1.05rem; font-weight: 800; letter-spacing: -0.01em;">Body found in Riverside Park</span>
+        </div>
+        <div style="font-size: 0.85rem; color: #a1a1aa; font-weight: 600; display: flex; align-items: center; gap: 4px;">
+            <span>Read Update on Facebook</span> &rarr;
+        </div>
+    </a>
+</div>
+""",
+    unsafe_allow_html=True,
+)
+
 # --- NEWS TICKER ---
 cst_time = datetime.now(ZoneInfo("America/Chicago")).strftime(
     "%I:%M:%S %p %Z"
@@ -270,8 +313,8 @@ cst_time = datetime.now(ZoneInfo("America/Chicago")).strftime(
 st.markdown(
     f"""
 <div class="tsn-ticker">
-    <span class="tsn-live-badge">BREAKING</span>
-    <span>NWS Doppler radar telemetry online • Active monitoring for severe convective activity • System time: {cst_time}</span>
+    <span class="tsn-live-badge">UPDATE</span>
+    <span>Law enforcement on scene at Riverside Park • NWS Doppler radar telemetry online • System time: {cst_time}</span>
 </div>
 """,
     unsafe_allow_html=True,
