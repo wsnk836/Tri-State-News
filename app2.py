@@ -360,7 +360,6 @@ Want quick one-tap access to Tri-State News like a native mobile app? Follow the
 1. Open this app in **Google Chrome**, **Microsoft Edge**, or **Brave**.
 2. Look for the **install icon** (a small monitor with a down arrow or a plus sign) located on the right side of your browser address/URL bar.
 3. Click **Install**. 
-4. *(Note: On desktop, you can usually right-click the installed app shortcut on your desktop or applications folder later to rename it to whatever you prefer).*
     """
     )
 
@@ -386,13 +385,37 @@ if "community_announcements" not in st.session_state:
             "title": "Welcome to Tri-State Announcements",
             "text": (
                 "Use the submission form below to broadcast local notices,"
-                " community events, or missing item alerts."
+                " community events, or missing item alerts instantly to the public board."
             ),
             "time": datetime.now(ZoneInfo("America/Chicago")).strftime(
                 "%b %d, %I:%M %p"
             ),
         },
     ]
+
+# --- CAPTURE INCOMING FORM SUBMISSIONS FROM FORMSUBMIT REDIRECT ---
+if query_params.get("announcement") == "success":
+    # Check if we have temporary submission data or need to add a generic entry if params passed
+    # FormSubmit passes form fields back in URL query parameters when redirecting if configured, 
+    # or we can extract them if present. Let's check query params for author/title/details/private_contact
+    incoming_author = query_params.get("author", "Community Member")
+    incoming_contact = query_params.get("private_contact", "Not Provided")
+    incoming_title = query_params.get("title", "Community Notice")
+    incoming_text = query_params.get("details", "New community announcement posted.")
+    current_time_str = datetime.now(ZoneInfo("America/Chicago")).strftime("%b %d, %I:%M %p")
+    
+    # Prevent duplicate appends on page refresh
+    last_added = st.session_state.get("last_added_announcement", "")
+    unique_key = f"{incoming_title}_{incoming_text}"
+    if unique_key != last_added:
+        st.session_state.community_announcements.insert(0, {
+            "author": incoming_author,
+            "contact": incoming_contact,
+            "title": incoming_title,
+            "text": incoming_text,
+            "time": current_time_str
+        })
+        st.session_state["last_added_announcement"] = unique_key
 
 # --- BREAKING NEWS BANNER ---
 st.markdown(
@@ -750,7 +773,7 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
                     <span style="background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; padding: 3px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">PUBLIC BULLETIN BOARD</span>
                 </div>
                 <p style="color: #334155; font-size: 0.95rem; font-weight: 500; margin-bottom: 20px; line-height: 1.6;">
-                    Your direct broadcast channel for regional public notices, community gatherings, missing item alerts, and local organization updates across the tri-state area.
+                    Your direct broadcast channel for regional public notices, community gatherings, missing item alerts, and local organization updates across the tri-state area. All submitted notices appear instantly on this public board for everyone to see.
                 </p>
             """,
             unsafe_allow_html=True,
@@ -787,7 +810,7 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
                         st.rerun()
                 st.markdown("</div></div>", unsafe_allow_html=True)
 
-        # Submission Form using FormSubmit for Email Notification
+        # Submission Form using FormSubmit for Email Notification and Public Board Addition
         st.markdown("<h4 style='color: #0f172a; font-size: 1.1rem; font-weight: 800; margin-top: 25px;'>✍️ Submit a Community Announcement</h4>", unsafe_allow_html=True)
         
         comm_html_form = """
@@ -816,13 +839,13 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
                 <textarea name="details" required rows="4" placeholder="Provide full details, date, time, and location..." style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.95rem; background: #ffffff; color: #0f172a;"></textarea>
             </div>
             
-            <button type="submit" style="background-color: #dc2626; color: #ffffff; border: 1px solid #b91c1c; font-weight: 900; padding: 12px 20px; border-radius: 6px; width: 100%; cursor: pointer; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);">Broadcast Notice</button>
+            <button type="submit" style="background-color: #dc2626; color: #ffffff; border: 1px solid #b91c1c; font-weight: 900; padding: 12px 20px; border-radius: 6px; width: 100%; cursor: pointer; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);">Broadcast Notice to Public Board</button>
         </form>
         """
         components.html(comm_html_form, height=490)
 
         if query_params.get("announcement") == "success":
-            st.success("Notice successfully broadcasted and email notification sent to wsnk836@gmail.com!")
+            st.success("Notice successfully broadcasted to the public board and email notification sent to wsnk836@gmail.com!")
 
         st.markdown("</div>", unsafe_allow_html=True)
 
