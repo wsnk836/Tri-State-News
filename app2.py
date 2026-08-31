@@ -297,49 +297,25 @@ st.markdown("<div style='margin-bottom: 15px;'></div>", unsafe_allow_html=True)
 with st.expander("📲 How to Install TSN Live on Your Device", expanded=False):
     st.markdown(
         """
-        <div style="color: #f4f4f5; font-size: 0.9rem; line-height: 1.5;">
-            <p style="margin-bottom: 12px; color: #a1a1aa;">
-                Want quick one-tap access to TSN Live like a native mobile app? Follow the steps below for your specific device:
-            </p>
-            
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-top: 10px;">
-                
-                <!-- iOS / iPhone / iPad -->
-                <div style="background: #0f1015; border: 1px solid #27272a; border-left: 3px solid #3b82f6; border-radius: 8px; padding: 12px;">
-                    <strong style="color: #60a5fa; font-size: 0.95rem;">🍎 iPhone / iPad (Safari)</strong>
-                    <ol style="margin: 6px 0 0 16px; padding: 0; color: #d4d4d8; font-size: 0.85rem;">
-                        <li>Open this link in <strong>Safari</strong>.</li>
-                        <li>Tap the <strong>Share</strong> icon (box with upward arrow).</li>
-                        <li>Scroll down and select <strong>"Add to Home Screen"</strong>.</li>
-                        <li>Tap <strong>Add</strong> in the top right.</li>
-                    </ol>
-                </div>
+Want quick one-tap access to TSN Live like a native mobile app? Follow the steps below for your specific device:
 
-                <!-- Android -->
-                <div style="background: #0f1015; border: 1px solid #27272a; border-left: 3px solid #10b981; border-radius: 8px; padding: 12px;">
-                    <strong style="color: #34d399; font-size: 0.95rem;">🤖 Android (Chrome)</strong>
-                    <ol style="margin: 6px 0 0 16px; padding: 0; color: #d4d4d8; font-size: 0.85rem;">
-                        <li>Open this link in <strong>Google Chrome</strong>.</li>
-                        <li>Tap the <strong>three vertical dots</strong> (menu) in the top right.</li>
-                        <li>Select <strong>"Add to Home screen"</strong> or <strong>"Install app"</strong>.</li>
-                        <li>Confirm by tapping <strong>Install</strong>.</li>
-                    </ol>
-                </div>
+### 🍎 iPhone / iPad (Safari)
+1. Open this link in **Safari**.
+2. Tap the **Share** icon (the square with an upward arrow at the bottom of the screen).
+3. Scroll down the menu and select **"Add to Home Screen"**.
+4. Tap **Add** in the top right corner.
 
-                <!-- Mac / Windows Desktop -->
-                <div style="background: #0f1015; border: 1px solid #27272a; border-left: 3px solid #ef4444; border-radius: 8px; padding: 12px;">
-                    <strong style="color: #f87171; font-size: 0.95rem;">💻 Desktop (Chrome / Edge)</strong>
-                    <ol style="margin: 6px 0 0 16px; padding: 0; color: #d4d4d8; font-size: 0.85rem;">
-                        <li>Open this app in <strong>Chrome</strong> or <strong>Edge</strong>.</li>
-                        <li>Look for the <strong>install icon</strong> (monitor with down arrow or plus) in the right side of your browser address bar.</li>
-                        <li>Click <strong>Install</strong> to run TSN as a standalone desktop application.</li>
-                    </ol>
-                </div>
+### 🤖 Android (Chrome)
+1. Open this link in **Google Chrome**.
+2. Tap the **three vertical dots** (menu) in the top-right corner of the browser.
+3. Select **"Add to Home screen"** or **"Install app"**.
+4. Confirm by tapping **Install** on the prompt.
 
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
+### 💻 Desktop (Chrome / Edge / Safari)
+1. Open this app in **Google Chrome**, **Microsoft Edge**, or **Brave**.
+2. Look for the **install icon** (a small monitor with a down arrow or a plus sign) located on the right side of your browser address/URL bar.
+3. Click **Install** to run TSN instantly as a standalone desktop application on your computer.
+    """
     )
 
 st.markdown("<div style='margin-bottom: 15px;'></div>", unsafe_allow_html=True)
