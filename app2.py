@@ -462,31 +462,7 @@ def render_tsn_broadcast_center(lat, lon, loc_label):
                     "%b %d, %I:%M %p"
                 ),
             },
-            {
-                "author": "Tri-State County Fair Committee",
-                "title": "Annual Summer Fair Volunteer Sign-Up Open",
-                "text": (
-                    "We are looking for local volunteers for the upcoming Tri-State"
-                    " County Fair booths, parking coordination, and family"
-                    " entertainment areas. Free entry passes provided for all shifts."
-                ),
-                "time": datetime.now(ZoneInfo("America/Chicago")).strftime(
-                    "%b %d, %I:%M %p"
-                ),
-            },
-            {
-                "author": "Metro Transit Authority",
-                "title": "Scheduled Route Upgrades & Weekend Detours",
-                "text": (
-                    "Please note that downtown transit lines will operate on a modified"
-                    " weekend schedule due to utility maintenance along Main Street."
-                    " Check the regional transport portal for alternative stops."
-                ),
-                "time": datetime.now(ZoneInfo("America/Chicago")).strftime(
-                    "%b %d, %I:%M %p"
-                ),
-            },
-        ]
+            
 
     # --- ACTIVE WEATHER ALERTS ---
     try:
